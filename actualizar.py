@@ -327,6 +327,12 @@ def inject_data(js_data):
         f.write(new_html)
     print(f"✓ Dashboard actualizado: {OUTPUT}")
 
+    # También actualiza index.html (para GitHub Pages / celular)
+    index_path = os.path.join(BASE_DIR, 'index.html')
+    with open(index_path, 'w', encoding='utf-8') as f:
+        f.write(new_html)
+    print(f"✓ index.html actualizado: {index_path}")
+
 # ── 6. Cargar gastos manuales ──────────────────────────────────
 def load_gastos():
     if not os.path.exists(GASTOS_FILE):
