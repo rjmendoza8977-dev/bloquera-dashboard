@@ -1,0 +1,2452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Bloquera Fúnez — Dashboard Financiero</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;font-size:13px}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:linear-gradient(90deg,#1a1a3e 0%,#1e2a5e 100%);
+  display:flex;align-items:center;padding:0 24px;height:64px;gap:0;
+}
+.brand{display:flex;align-items:center;gap:12px;margin-right:32px}
+.brand-icon{font-size:32px}
+.brand-text h1{color:#fff;font-size:20px;font-weight:800;line-height:1.1}
+.brand-text p{color:#8899cc;font-size:11px}
+.nav{display:flex;gap:4px;flex:1}
+.nav-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:6px;border:none;
+  font-size:13px;font-weight:500;cursor:pointer;
+  color:#aabbdd;background:transparent;transition:all .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-btn.active{background:#fff;color:#1a1a3e;font-weight:700}
+.powerbi{display:flex;align-items:center;gap:6px;color:#f2c811;font-size:13px;font-weight:700;margin-left:auto}
+.pbi-icon{width:24px;height:24px}
+
+/* ── FILTER BAR ── */
+.filterbar{
+  background:#fff;border-bottom:1px solid #dde2ee;
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:12px;padding:10px 24px;
+}
+.date-input{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid #cdd5e0;border-radius:6px;padding:5px 10px;
+  font-size:12px;color:#334;background:#fff;cursor:pointer;
+}
+.select-filter{
+  border:1px solid #cdd5e0;border-radius:6px;padding:5px 28px 5px 10px;
+  font-size:12px;color:#334;background:#fff;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23667'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;min-width:160px;
+}
+
+/* ── MAIN GRID ── */
+.content{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{
+  background:#fff;border-radius:10px;padding:14px 16px;
+  border:1px solid #e0e5ef;position:relative;overflow:hidden;
+}
+.kpi.highlighted{background:#1e3a6e;border-color:#1e3a6e}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.kpi.blue   .kpi-label{color:#0066cc}
+.kpi.green  .kpi-label{color:#00aa55}
+.kpi.purple .kpi-label{color:#7c3aed}
+.kpi.orange .kpi-label{color:#ea6c00}
+.kpi.teal   .kpi-label{color:#00897b}
+.kpi.highlighted .kpi-label{color:#7ca8ff}
+.kpi-body{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.kpi-icon-wrap{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.kpi.blue   .kpi-icon-wrap{background:#e6f0ff}
+.kpi.green  .kpi-icon-wrap{background:#e6f9f0}
+.kpi.purple .kpi-icon-wrap{background:#f3e8ff}
+.kpi.orange .kpi-icon-wrap{background:#fff3e0}
+.kpi.teal   .kpi-icon-wrap{background:#e0f5f3}
+.kpi.highlighted .kpi-icon-wrap{background:rgba(255,255,255,.15)}
+.kpi-value{font-size:19px;font-weight:800;line-height:1;color:#1a1a2e}
+.kpi.highlighted .kpi-value{color:#fff;font-size:22px}
+.kpi.highlighted.pct .kpi-value{font-size:28px}
+.kpi-trend{font-size:11px;color:#666}
+.kpi-trend .up{color:#00aa55;font-weight:700}
+.kpi-trend .dn{color:#e53935;font-weight:700}
+.kpi-pct{
+  margin-left:auto;align-self:flex-start;
+  font-size:11px;font-weight:800;padding:2px 7px;border-radius:12px;
+  background:#e8f0fe;color:#1565c0;white-space:nowrap;
+}
+.kpi-pct-neg{background:#fce4ec;color:#c62828}
+.kpi-pct-warn{background:#fff3e0;color:#e65100}
+.kpi-pct-ok{background:#e8f5e9;color:#2e7d32}
+.kpi-pct-light{background:rgba(255,255,255,.25);color:#fff}
+
+/* ── MIDDLE ROW ── */
+.mid-row{display:grid;grid-template-columns:2fr 1.4fr 1fr auto;gap:12px;align-items:start}
+/* ── BOTTOM ROW ── */
+.bot-row{display:grid;grid-template-columns:1.3fr 1.2fr 1fr;gap:12px;align-items:start}
+/* ── METRICS ROW ── */
+.metrics-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+
+.card{background:#fff;border-radius:10px;border:1px solid #e0e5ef;padding:16px;overflow:hidden}
+.card-title{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:14px}
+
+/* sidebar */
+.sidebar-panel{
+  background:#fff;border-radius:10px;border:1px solid #e0e5ef;
+  padding:16px;display:flex;flex-direction:column;gap:12px;min-width:160px;
+}
+/* Drawer sidebar */
+.sidebar-drawer {
+  position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
+  background: #fff; border-left: 1px solid #dde2ee;
+  box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  z-index: 1000; transition: right .25s ease;
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 24px 20px; overflow-y: auto;
+}
+.sidebar-drawer.open { right: 0; }
+.sidebar-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.25);
+  z-index: 999; display: none;
+}
+.sidebar-drawer-overlay.open { display: block; }
+.sidebar-drawer-close {
+  position: absolute; top: 14px; right: 14px;
+  background: #f0f2f5; border: none; border-radius: 6px;
+  width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.sidebar-drawer-close:hover { background: #dde2ee; }
+.sidebar-drawer h2 {
+  font-size: 14px; font-weight: 800; color: #1a1a2e;
+  border-bottom: 1px solid #e0e5ef; padding-bottom: 12px; margin-bottom: 4px;
+}
+.filter-group label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px}
+.filter-group select{width:100%;border:1px solid #cdd5e0;border-radius:5px;padding:5px 8px;font-size:12px;color:#334;background:#f8f9fc;}
+.last-update{background:#f0f4ff;border-radius:6px;padding:8px;font-size:10px;display:flex;align-items:flex-start;gap:6px;color:#334;}
+.notes-box{background:#f8f9fc;border-radius:6px;padding:8px;font-size:10px;color:#556;line-height:1.5}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  color:#667;padding:6px 8px;border-bottom:2px solid #e0e5ef;text-align:left;
+}
+tbody td{padding:7px 8px;font-size:12px;border-bottom:1px solid #f0f2f8}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f7f9ff}
+.fw{font-weight:700}
+.up{color:#00aa55}.dn{color:#e53935}
+.row-util td{background:#e8f4ec;font-weight:700}
+.row-op td{background:#fdf3e7;font-weight:700}
+.row-net td{background:#1e3a6e;color:#fff;font-weight:700}
+.row-net td .up{color:#7dffb3}
+.margin-bar{display:inline-block;height:10px;border-radius:3px;background:#00aa55;}
+.margin-bar.low{background:#f59e0b}
+.margin-bar.neg{background:#ef4444}
+
+/* ── METRIC CARDS ── */
+.metric-card{
+  background:#fff;border-radius:10px;border:1px solid #e0e5ef;
+  padding:16px;display:flex;align-items:center;gap:12px;
+}
+.metric-icon{font-size:26px}
+.metric-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.metric-card.blue  .metric-label{color:#0066cc}
+.metric-card.green .metric-label{color:#00aa55}
+.metric-card.teal  .metric-label{color:#00897b}
+.metric-card.orange .metric-label{color:#ea6c00}
+.metric-card.purple .metric-label{color:#7c3aed}
+.metric-value{font-size:16px;font-weight:800;color:#1a1a2e}
+.metric-sub{font-size:10px;color:#888;margin-top:3px;line-height:1.4}
+
+/* ── PRO: HOVER STATES ── */
+.kpi {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.kpi:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(30,58,138,.10);
+  border-color: #b8c5e0;
+}
+.kpi.highlighted:hover {
+  box-shadow: 0 6px 24px rgba(30,42,94,.25);
+}
+.card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.07);
+}
+.metric-card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+
+/* ── PRO: RESPONSIVE KPI GRID ── */
+@media (max-width:1400px) {
+  .kpi-row[style*="repeat(7"] { grid-template-columns: repeat(4,1fr) !important; }
+}
+@media (max-width:900px) {
+  .kpi-row { grid-template-columns: repeat(2,1fr) !important; }
+  .mid-row, .bot-row { grid-template-columns: 1fr !important; }
+  .metrics-row { grid-template-columns: repeat(2,1fr) !important; }
+  .sidebar-panel { min-width: unset; }
+}
+
+/* ── PRO: SPARKLINE WRAPPERS ── */
+.kpi-sparkline-wrap {
+  width: 100%; height: 32px; margin-top: 6px; position: relative;
+}
+.kpi-sparkline-wrap canvas {
+  width: 100% !important; height: 32px !important;
+}
+
+/* ── PRO: ESTADO RESULTADOS MEJORADO ── */
+.er-subtotal td {
+  background: transparent !important;
+  border-top: 2px solid #e0e5ef;
+  border-bottom: 2px solid #e0e5ef;
+}
+.er-subtotal td:first-child {
+  border-left: 4px solid #1e3a8a;
+  padding-left: 10px;
+}
+.er-net td {
+  background: #f0f4ff !important;
+  color: #1a1a2e !important;
+  font-weight: 700;
+}
+.er-net td:first-child {
+  border-left: 4px solid #1e3a8a;
+  padding-left: 10px;
+  color: #1e3a8a !important;
+}
+.er-net td .up { color: #00aa55 !important; }
+.er-net td .dn { color: #e53935 !important; }
+.row-util td { background: #eef6f0 !important; }
+.row-util td:first-child { border-left: 4px solid #00aa55; padding-left: 10px; }
+.row-op td { background: #fdf6ec !important; }
+.row-op td:first-child { border-left: 4px solid #ea6c00; padding-left: 10px; }
+.row-net td { background: #f0f4ff !important; color: #1a1a2e !important; }
+.row-net td:first-child { border-left: 4px solid #1e3a8a; padding-left: 10px; color: #1e3a8a !important; }
+
+/* ── PRO: BUTTONS ── */
+.btn-primary {
+  background: #1e3a8a; color: #fff; border: none; border-radius: 7px;
+  padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-primary:hover { background: #1e4db0; transform: translateY(-1px); }
+.btn-secondary {
+  background: #eef1f8; color: #334; border: 1px solid #cdd5e0; border-radius: 7px;
+  padding: 7px 14px; font-size: 12px; cursor: pointer;
+  font-family: inherit; transition: background .15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-secondary:hover { background: #dde3f0; }
+
+/* ── PRO: CHART SUBTITLE ── */
+.chart-subtitle {
+  font-size: 10px; color: #888; font-weight: 500; margin-top: -10px; margin-bottom: 10px;
+}
+
+/* ── PRO: PROGRESS BAR EN TABLA PRODUCTOS ── */
+.prod-margin-wrap {
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.prod-margin-bar {
+  height: 8px; border-radius: 4px; flex-shrink: 0; transition: width .4s ease;
+}
+.prod-margin-label { font-size: 11px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">&#129529;</div>
+    <div class="brand-text">
+      <h1>Bloquera Fúnez</h1>
+      <p>Dashboard Financiero</p>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active">&#128202; Resumen</button>
+    <button class="nav-btn">&#128722; Ventas</button>
+    <button class="nav-btn">&#128203; Gastos</button>
+    <button class="nav-btn">&#127959; Inventario</button>
+    <button class="nav-btn">&#9881; Producción</button>
+    <button class="nav-btn">&#128200; Análisis</button>
+  </nav>
+  <button id="btnToggleSidebar" class="btn-secondary" style="margin-left:8px;padding:6px 12px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.8)" title="Filtros rápidos">&#9776; Filtros</button>
+  <div class="powerbi">
+    <svg class="pbi-icon" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="10" width="4" height="12" rx="1" fill="#f2c811"/>
+      <rect x="8" y="6" width="4" height="16" rx="1" fill="#f2c811"/>
+      <rect x="14" y="2" width="4" height="20" rx="1" fill="#f2c811"/>
+    </svg>
+    Power BI
+  </div>
+</div>
+
+<!-- ══ FILTER BAR ══ -->
+<div class="filterbar">
+  <label style="font-size:11px;font-weight:600;color:#556">Desde:</label>
+  <input type="date" id="dateFrom" class="select-filter" value="2026-04-01" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
+  <label style="font-size:11px;font-weight:600;color:#556">Hasta:</label>
+  <input type="date" id="dateTo" class="select-filter" value="2026-04-30" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
+  <select id="filterProd" class="select-filter">
+    <option value="">Todos los productos</option>
+    <option value="BLOQUE 6">Bloque 6</option>
+    <option value="BLOQUE 4">Bloque 4</option>
+    <option value="CEMENTO CANAL">Cemento Canal</option>
+    <option value="CEMENTO CONTINENTAL">Cemento Continental</option>
+    <option value="TRANSPORTE VOLKSWAGEN">Transporte</option>
+  </select>
+  <button id="btnApply" class="btn-primary">&#128269; Aplicar</button>
+  <button id="btnReset" class="btn-secondary">&#10006; Limpiar</button>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<!-- SECCIÓN: RESUMEN (default) -->
+<div class="content" id="sec-resumen">
+
+  <!-- KPI Row -->
+  <div class="kpi-row" style="grid-template-columns:repeat(7,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Ventas Totales</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128176;</div>
+        <div class="kpi-value" id="kpiVentas">C$ 1,594,705</div>
+        <span class="kpi-pct" id="kpiVentasPct">100%</span>
+      </div>
+      <div class="kpi-trend" id="kpiVentasTrend">vs mes anterior <span class="dn">&#9660; -39.1%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkVentas"></canvas></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Costo de Ventas</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128218;</div>
+        <div class="kpi-value" id="kpiCosto">C$ 963,435</div>
+        <span class="kpi-pct kpi-pct-neg" id="kpiCostoPct">60.4%</span>
+      </div>
+      <div class="kpi-trend" id="kpiCostoTrend">vs mes anterior <span class="dn">&#9660; -40.6%</span></div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Utilidad Bruta</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128188;</div>
+        <div class="kpi-value" id="kpiUB">C$ 631,270</div>
+        <span class="kpi-pct kpi-pct-light" id="kpiUBPct">39.6%</span>
+      </div>
+      <div class="kpi-trend" style="color:#aabbdd" id="kpiUBTrend">vs mes anterior <span style="color:#ef9a9a;font-weight:700">&#9660; -36.7%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkUB"></canvas></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Gastos Operativos</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128196;</div>
+        <div class="kpi-value" id="kpiGastos">C$ 550,976</div>
+        <span class="kpi-pct kpi-pct-warn" id="kpiGastosPct">34.6%</span>
+      </div>
+      <div class="kpi-trend">vs mes anterior <span class="up">&#9650; +4.9%</span></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Reinversión</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128200;</div>
+        <div class="kpi-value" id="kpiUN">C$ 80,295</div>
+        <span class="kpi-pct kpi-pct-ok" id="kpiUNPct">5.0%</span>
+      </div>
+      <div class="kpi-trend" id="kpiUNTrend">vs mes anterior <span class="dn">&#9660; -83.0%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkUN"></canvas></div>
+    </div>
+    <div class="kpi green" id="kpiReinvCard" style="cursor:pointer;border:2px solid #00aa55" onclick="toggleReinvDetalle()" title="Ver desglose">
+      <div class="kpi-label" style="color:#00aa55">&#9654; Utilidad Neta</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap" style="background:#e6f9f0">&#128260;</div>
+        <div class="kpi-value" id="kpiReinv" style="color:#00aa55">C$ —</div>
+        <span class="kpi-pct kpi-pct-ok" id="kpiReinvPct">—</span>
+      </div>
+      <div class="kpi-trend" id="kpiReinvTrend" style="color:#666">Inversión + Utilidad Neta</div>
+    </div>
+    <div class="kpi highlighted pct">
+      <div class="kpi-label">Margen de Utilidad</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap" style="font-size:14px;font-weight:800;color:#fff">%</div>
+        <div class="kpi-value" id="kpiMargen">5.0%</div>
+      </div>
+      <div class="kpi-trend" style="color:#aabbdd">Utilidad Neta / Ventas</div>
+    </div>
+  </div>
+
+  <!-- Reinversión detalle panel (hidden by default) -->
+  <div id="reinvDetalle" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-top:-4px">
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:10px">📊 Desglose de Reinversión del Mes</div>
+    <table style="width:100%;font-size:12px">
+      <thead><tr style="color:#666"><th style="text-align:left">Componente</th><th style="text-align:right">Monto (C$)</th></tr></thead>
+      <tbody id="reinvDetalleBody"></tbody>
+      <tfoot id="reinvDetalleFoot"></tfoot>
+    </table>
+    <div style="margin-top:8px;font-size:10px;color:#888">* Reinversión = Capital comprometido (Gasto por Inversión) + Utilidad Neta generada en el periodo.</div>
+  </div>
+
+  <!-- Middle Row -->
+  <div class="mid-row">
+
+    <!-- Line Chart: Ventas diarias Abril 2026 -->
+    <div class="card">
+      <div class="card-title" id="lineChartTitle">Ventas, Costo y Utilidad Bruta (Por día) — Abril 2026</div>
+      <div class="chart-subtitle" id="lineChartSub">Abril 2026 &nbsp;|&nbsp; Todos los productos</div>
+      <canvas id="lineChart" height="130"></canvas>
+    </div>
+
+    <!-- Bar+Line Chart: Utilidad Bruta Mensual -->
+    <div class="card">
+      <div class="card-title">Utilidad Bruta Mensual</div>
+      <canvas id="barLineChart" height="130"></canvas>
+    </div>
+
+    <!-- Donut: Estructura de Costos -->
+    <div class="card">
+      <div class="card-title">Estructura de Costos</div>
+      <div style="position:relative;width:160px;height:160px;margin:0 auto 12px">
+        <canvas id="donutChart"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+          <div style="font-size:13px;font-weight:800;color:#1a1a2e" id="donutCenter">C$963,435</div>
+          <div style="font-size:9px;color:#888">Total Costo</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#1e3a8a;border-radius:2px;flex-shrink:0"></span>
+          <span>Materiales Directos<br><strong id="donutLegMat">C$760,639 (79.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#22c55e;border-radius:2px;flex-shrink:0"></span>
+          <span>Mano de Obra<br><strong>C$0 (0.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;flex-shrink:0"></span>
+          <span>Gastos de Producción<br><strong>C$0 (0.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#ef4444;border-radius:2px;flex-shrink:0"></span>
+          <span>Otros Costos<br><strong id="donutLegOtros">C$202,796 (21.0%)</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Filters -->
+    <div class="sidebar-panel">
+      <div style="font-size:12px;font-weight:700;color:#1a1a2e;border-bottom:1px solid #e0e5ef;padding-bottom:8px">Filtros Rápidos</div>
+      <div class="filter-group">
+        <label>Año</label>
+        <select><option>2026</option><option>2025</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Mes</label>
+        <select>
+          <option>Mayo</option>
+          <option selected>Abril</option>
+          <option>Marzo</option>
+          <option>Febrero</option>
+          <option>Enero</option>
+          <option>Diciembre</option>
+          <option>Noviembre</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Producto</label>
+        <select>
+          <option>Todos</option>
+          <option>Bloque 6</option>
+          <option>Bloque 4</option>
+          <option>Cemento</option>
+          <option>Arena</option>
+          <option>Transporte</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Cliente</label>
+        <select><option>Todos</option></select>
+      </div>
+      <div class="last-update">
+        &#128197;
+        <div>
+          <div style="font-weight:700;margin-bottom:2px">Última Actualización</div>
+          02/05/2026 12:27 AM
+        </div>
+      </div>
+      <div class="notes-box">
+        <strong>Notas</strong><br>
+        Los datos se actualizan automáticamente al cambiar los filtros.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bot-row">
+
+    <!-- Estado de Resultados -->
+    <div class="card">
+      <div class="card-title">Estado de Resultados (Resumen)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Este Mes (C$)</th>
+            <th>% Ventas</th>
+            <th>Mes Anterior (C$)</th>
+            <th>% Ventas</th>
+            <th>Variación</th>
+          </tr>
+        </thead>
+        <tbody id="erBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Utilidad por Producto -->
+    <div class="card">
+      <div class="card-title">Utilidad Bruta por Producto</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Ventas (C$)</th>
+            <th>Costo (C$)</th>
+            <th>Utilidad Bruta (C$)</th>
+            <th>Margen %</th>
+          </tr>
+        </thead>
+        <tbody id="productTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Gastos Operativos -->
+    <div class="card">
+      <div class="card-title">Gastos Operativos por Categoría</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Monto (C$)</th>
+            <th>% del Total</th>
+          </tr>
+        </thead>
+        <tbody id="gastosTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Metrics Row -->
+  <div class="metrics-row">
+    <div class="metric-card blue">
+      <div class="metric-icon">&#9878;</div>
+      <div>
+        <div class="metric-label">Punto de Equilibrio</div>
+        <div class="metric-value" id="metPE">C$ —</div>
+        <div class="metric-sub">Ventas necesarias para cubrir costos y gastos</div>
+      </div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-icon">&#128203;</div>
+      <div>
+        <div class="metric-label">ROI (Estimado)</div>
+        <div class="metric-value" id="metROI">—</div>
+        <div class="metric-sub">Retorno sobre inversión del periodo</div>
+      </div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-icon">&#128181;</div>
+      <div>
+        <div class="metric-label">Flujo Neto de Efectivo</div>
+        <div class="metric-value" id="metFlujo">C$ —</div>
+        <div class="metric-sub">Entradas - Salidas de efectivo</div>
+      </div>
+    </div>
+    <div class="metric-card orange">
+      <div class="metric-icon">&#128202;</div>
+      <div>
+        <div class="metric-label">Rendimiento sobre Ventas</div>
+        <div class="metric-value" id="metRendimiento">—</div>
+        <div class="metric-sub">Utilidad Neta / Ventas Netas</div>
+      </div>
+    </div>
+    <div class="metric-card purple">
+      <div class="metric-icon">&#128200;</div>
+      <div>
+        <div class="metric-label">Tendencia General</div>
+        <div class="metric-value" id="metTendencia">—</div>
+        <div class="metric-sub" id="metTendenciaSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pérdidas por Productos Dañados -->
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start">
+    <div class="metric-card" style="border-left:5px solid #e53935;min-width:220px">
+      <div class="metric-icon">&#9888;</div>
+      <div>
+        <div class="metric-label" style="color:#e53935">Pérdidas — Productos Dañados</div>
+        <div class="metric-value" style="color:#e53935;font-size:22px">C$ 71,869</div>
+        <div class="metric-sub">Acumulado histórico (Nov 2025 – May 2026)</div>
+        <div style="margin-top:6px;font-size:11px;color:#888">
+          Nov: C$20,115 &nbsp;|&nbsp; Dic: C$17,444 &nbsp;|&nbsp; Ene: C$25,536 &nbsp;|&nbsp; May: C$8,774
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="card-title">&#9888; Detalle de Bajas por Productos Dañados</div>
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Producto</th><th>Cantidad (uds)</th><th>P. Costo Unit.</th><th>Pérdida (C$)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-01-31</td><td>Bloque (13.69)</td>
+            <td style="text-align:right">281</td><td>C$13.69</td><td class="fw dn">3,847</td>
+          </tr>
+          <tr>
+            <td>2026-01-31</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">611</td><td>C$16.00</td><td class="fw dn">9,776</td>
+          </tr>
+          <tr>
+            <td>2026-04-21</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">0</td><td>C$16.00</td><td class="fw" style="color:#888">0</td>
+          </tr>
+          <tr>
+            <td>2026-05-23</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">349</td><td>C$16.00</td><td class="fw dn">5,584</td>
+          </tr>
+          <tr>
+            <td>2026-05-23</td><td>Bloque (13.69)</td>
+            <td style="text-align:right">233</td><td>C$13.69</td><td class="fw dn">3,190</td>
+          </tr>
+          <tr style="border-top:2px solid #cdd5e0;background:#fff0f0">
+            <td colspan="2" class="fw">TOTAL PÉRDIDA REGISTRADA (detalle)</td>
+            <td style="text-align:right;font-weight:700">1,474</td><td></td>
+            <td class="fw dn" style="font-size:14px">22,397</td>
+          </tr>
+          <tr style="background:#fff0f0">
+            <td colspan="4" class="fw" style="color:#888;font-size:11px">+ Pérdidas Nov–Dic sin detalle de producto</td>
+            <td class="fw dn">49,472</td>
+          </tr>
+          <tr style="background:#ffe8e8;border-top:2px solid #e53935">
+            <td colspan="4" class="fw" style="color:#e53935">TOTAL ACUMULADO</td>
+            <td class="fw" style="color:#e53935;font-size:15px">71,869</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Meta Mensual vs Real + Proyección -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0">
+
+    <!-- Meta vs Real -->
+    <div class="card" style="border-top:3px solid #1e40af">
+      <div class="card-title">&#127919; Meta Mensual vs Real</div>
+      <div id="metaPanel">
+        <!-- filled by JS -->
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <span style="font-size:12px;color:#555">Ventas acumuladas</span>
+          <span style="font-size:13px;font-weight:700" id="metaVentasVal">—</span>
+        </div>
+        <!-- PE progress bar -->
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+            <span>Punto de Equilibrio (meta mínima)</span>
+            <span id="metaPELabel">—</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:6px;height:14px;overflow:hidden;position:relative">
+            <div id="metaPEBar" style="height:100%;border-radius:6px;background:#1e40af;transition:width .5s"></div>
+            <div id="metaPEPin" style="position:absolute;top:0;height:100%;width:2px;background:#dc2626"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:3px">
+            <span>C$ 0</span><span id="metaPERightLabel">Meta PE</span>
+          </div>
+        </div>
+        <!-- UN vs meta -->
+        <div id="metaStatusBox" style="border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.7"></div>
+      </div>
+    </div>
+
+    <!-- Proyección del mes -->
+    <div class="card" style="border-top:3px solid #10b981">
+      <div class="card-title">&#128200; Proyección del Mes en Curso</div>
+      <div id="proyPanel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:10px;color:#666;text-transform:uppercase;font-weight:700">Días operados</div>
+            <div style="font-size:22px;font-weight:800;color:#1e40af" id="proyDias">—</div>
+          </div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:10px;color:#666;text-transform:uppercase;font-weight:700">Días del mes</div>
+            <div style="font-size:22px;font-weight:800;color:#374151" id="proyDiasMes">—</div>
+          </div>
+        </div>
+        <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="font-size:11px;color:#065f46;font-weight:600;margin-bottom:2px">Promedio diario actual</div>
+          <div style="font-size:18px;font-weight:800;color:#059669" id="proyPromDiario">—</div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px">
+          <div style="font-size:11px;color:#1e40af;font-weight:600;margin-bottom:2px">Proyección cierre de mes</div>
+          <div style="font-size:22px;font-weight:800;color:#1d4ed8" id="proyFinal">—</div>
+          <div style="font-size:10px;color:#888;margin-top:2px" id="proyVsMeta"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /sec-resumen -->
+
+<!-- SECCIÓN: VENTAS -->
+<div class="content" id="sec-ventas" style="display:none">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Ventas del Mes</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128176;</div><div class="kpi-value" id="vKpiVentas">C$ —</div></div>
+      <div class="kpi-trend" id="vKpiVentasTrend"></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Nº de Transacciones</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128203;</div><div class="kpi-value" id="vKpiTx">—</div></div>
+      <div class="kpi-trend">tickets del periodo</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Venta Promedio/Día</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128200;</div><div class="kpi-value" id="vKpiProm">C$ —</div></div>
+      <div class="kpi-trend" style="color:#aabbdd">por día con ventas</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Mejor Día</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#127942;</div><div class="kpi-value" id="vKpiMejor">—</div></div>
+      <div class="kpi-trend" id="vKpiMejorSub"></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Ventas Diarias del Periodo</div>
+      <canvas id="vLineChart" height="130"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Productos por Ventas</div>
+      <canvas id="vBarProds" height="130"></canvas>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Detalle de Ventas por Producto — Periodo Activo</div>
+    <table>
+      <thead><tr><th>Producto</th><th>Ventas (C$)</th><th>Costo (C$)</th><th>Utilidad Bruta</th><th>Margen %</th><th>Cantidad</th></tr></thead>
+      <tbody id="vProdTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECCIÓN: GASTOS -->
+<div class="content" id="sec-gastos" style="display:none">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi orange">
+      <div class="kpi-label">Gastos Totales</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128196;</div><div class="kpi-value" id="gKpiTotal">C$ —</div></div>
+      <div class="kpi-trend" id="gKpiTrend"></div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Mayor Categoría</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128197;</div><div class="kpi-value" id="gKpiCat">—</div></div>
+      <div class="kpi-trend" id="gKpiCatSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">% sobre Ventas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128202;</div><div class="kpi-value" id="gKpiPct">—</div></div>
+      <div class="kpi-trend">gastos / ventas netas</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Utilidad Neta</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128181;</div><div class="kpi-value" id="gKpiUN">C$ —</div></div>
+      <div class="kpi-trend" style="color:#aabbdd">tras descontar gastos</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Gastos por Categoría</div>
+      <canvas id="gBarChart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Gastos Mensuales (Nov 2025 – May 2026)</div>
+      <canvas id="gMonthChart" height="160"></canvas>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Detalle de Gastos — Periodo Activo</div>
+    <table>
+      <thead><tr><th>Categoría</th><th>Monto (C$)</th><th>% del Total</th></tr></thead>
+      <tbody id="gDetailTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECCIÓN: INVENTARIO -->
+<div class="content" id="sec-inventario" style="display:none">
+
+  <!-- KPIs -->
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Referencias Activas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128230;</div><div class="kpi-value" id="iKpiProds">—</div></div>
+      <div class="kpi-trend">productos vendidos en el periodo</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Producto Estrella</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#11088;</div><div class="kpi-value" id="iKpiEstrella" style="font-size:13px">—</div></div>
+      <div class="kpi-trend" id="iKpiEstrellaSub"></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Mayor Margen</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128200;</div><div class="kpi-value" id="iKpiTopMargen" style="font-size:13px">—</div></div>
+      <div class="kpi-trend" id="iKpiTopMargenSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Unidades Vendidas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128667;</div><div class="kpi-value" id="iKpiUnidades">—</div></div>
+      <div class="kpi-trend">total uds del periodo</div>
+    </div>
+    <div class="kpi highlighted" style="border-top:3px solid #ef4444">
+      <div class="kpi-label" style="color:#f87171">Pérdidas por Daños</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap" style="background:rgba(239,68,68,.15)">&#9888;</div><div class="kpi-value" id="iKpiDanos" style="color:#f87171;font-size:16px">C$ —</div></div>
+      <div class="kpi-trend" id="iKpiDanosSub" style="color:#aabbdd"></div>
+    </div>
+  </div>
+
+  <!-- Análisis ABC + Chart participación -->
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Análisis ABC — Participación en Ventas del Periodo</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:10px">A = Top 70% ventas &nbsp;|&nbsp; B = Siguiente 20% &nbsp;|&nbsp; C = Restante 10%</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Producto</th>
+            <th style="text-align:right">Uds Vendidas</th>
+            <th style="text-align:right">Ventas (C$)</th>
+            <th style="text-align:right">% Participación</th>
+            <th style="text-align:right">Margen</th>
+            <th style="text-align:center">Desempeño</th>
+          </tr>
+        </thead>
+        <tbody id="iAbcTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Mix de Ventas por Producto</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Participación % en ventas totales del periodo</div>
+      <canvas id="iMixChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Margen por producto + Tendencia histórica bloques -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Margen Bruto por Producto</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Verde ≥ 30% &nbsp;|&nbsp; Amarillo 10–30% &nbsp;|&nbsp; Rojo &lt; 10%</div>
+      <canvas id="iMargenChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Tendencia Mensual — Bloque 6 vs Bloque 4</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Ventas en C$ — Nov 2025 a May 2026</div>
+      <canvas id="iTendChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Panel pérdidas por daños -->
+  <div class="card" style="border-left:5px solid #ef4444">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" style="margin:0">&#9888; Impacto de Productos Dañados — Bloquera Fúnez (Acumulado)</div>
+      <span style="font-size:10px;color:#888">Solo Bloque 6 y Bloque 4 tienen registro confirmado de daños</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px" id="iDanosKpis"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th style="text-align:right">Uds Dañadas</th>
+          <th style="text-align:right">% sobre Entradas</th>
+          <th style="text-align:right">Precio Costo (C$)</th>
+          <th style="text-align:right">Pérdida Total (C$)</th>
+          <th style="text-align:center">Impacto</th>
+        </tr>
+      </thead>
+      <tbody id="iDanosTable"></tbody>
+    </table>
+    <div style="margin-top:8px;font-size:10px;color:#888">
+      * Dañados = unidades dadas de baja del registro "Productos Dañados". Precio costo = costo de producción unitario.
+      Productos sin registro de daños se omiten de esta tabla.
+    </div>
+  </div>
+
+  <!-- iBarChart oculto (necesario para compatibilidad con renderInventario original) -->
+  <div style="display:none"><canvas id="iBarChart"></canvas></div>
+  <div style="display:none"><canvas id="iFullTable" style="display:none"></canvas><tbody id="iFullTable" style="display:none"></tbody></div>
+  <div style="display:none"><table><tbody id="iStockTable"></tbody><tfoot id="iStockFoot"></tfoot></table></div>
+  <div style="display:none" id="iKpiRot"></div>
+  <div style="display:none" id="iKpiRotSub"></div>
+  <div style="display:none" id="iKpiCosto"></div>
+
+</div>
+
+<!-- SECCIÓN: ANÁLISIS -->
+<div class="content" id="sec-analisis" style="display:none">
+
+  <!-- Row 1: KPIs (6) + Health Score -->
+  <div class="kpi-row" style="grid-template-columns:repeat(6,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Punto de Equilibrio</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#9878;</div><div class="kpi-value" id="aKpiPE">C$ —</div></div>
+      <div class="kpi-trend">ventas mín. para no perder</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">ROI Estimado</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128203;</div><div class="kpi-value" id="aKpiROI">—</div></div>
+      <div class="kpi-trend" id="aKpiROISub">retorno sobre inversión</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Compras del Mes</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128666;</div><div class="kpi-value" id="aKpiCompras">C$ —</div></div>
+      <div class="kpi-trend" id="aKpiComprasSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">CxP Pendiente</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128196;</div><div class="kpi-value" id="aKpiCxP">C$ —</div></div>
+      <div class="kpi-trend" id="aKpiCxPSub"></div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #7c3aed">
+      <div class="kpi-label">Concentración Bloque 6</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap" style="background:rgba(124,58,237,.12)">&#9888;</div><div class="kpi-value" id="aKpiConc" style="font-size:22px">—</div></div>
+      <div class="kpi-trend" id="aKpiConcSub">del total de ventas</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Health Score</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#127919;</div><div class="kpi-value" id="aKpiHealth" style="font-size:22px">—</div></div>
+      <div class="kpi-trend" style="color:#aabbdd" id="aKpiHealthSub"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Insight cards + Waterfall -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.3fr;gap:12px">
+    <div class="card" style="border-left:4px solid #1e3a8a">
+      <div class="card-title">&#11088; Producto Líder</div>
+      <div id="hallazgoProd" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <div class="card" style="border-left:4px solid #ea6c00">
+      <div class="card-title">&#128196; Gasto Dominante</div>
+      <div id="hallazgoGasto" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <div class="card" style="border-left:4px solid #22c55e">
+      <div class="card-title">&#128181; Flujo de Caja</div>
+      <div id="hallazgoFlujo" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <!-- Waterfall P&L -->
+    <div class="card" style="border-left:4px solid #7c3aed">
+      <div class="card-title">&#127891; Cascada P&amp;L — Mes Activo</div>
+      <div id="aWaterfall" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Evolución multi-línea (margen overlay) + Margen evolution -->
+  <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Evolución Mensual: Ventas · Compras · Costo · Gastos
+        <span style="font-size:10px;color:#aaa;margin-left:8px">Ene 2026 sin dato de gastos</span>
+      </div>
+      <canvas id="aEvolucionChart" height="130"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Evolución del Margen Bruto % (7 meses)</div>
+      <canvas id="aMargenEvolChart" height="130"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 4: Utilidad neta + Flujo caja -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Utilidad Neta Mensual (C$) — barras + tendencia</div>
+      <canvas id="aUNChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Flujo de Caja Mensual (Entradas vs Salidas)</div>
+      <canvas id="aCajaChart" height="140"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 5: CxP table + Pérdidas dañados -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Cuentas por Pagar — Ventas a Crédito</div>
+      <table>
+        <thead><tr><th>Referencia</th><th>Fecha Venta</th><th>Total Venta</th><th>Saldo Pendiente</th><th>Estado</th></tr></thead>
+        <tbody id="aCxPTable"></tbody>
+      </table>
+    </div>
+    <div class="card" style="border-left:4px solid #e53935">
+      <div class="card-title">&#9888; Pérdidas por Productos Dañados (periodos con dato)</div>
+      <div id="aDanosAcum" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- Row 6: Resumen comparativo mensual con Δ MoM -->
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Resumen Comparativo Mensual <span style="font-size:10px;color:#aaa;font-weight:400">— ↑↓ variación vs mes anterior</span></div>
+    <table>
+      <thead><tr><th>Mes</th><th>Ventas</th><th>Δ Ventas</th><th>Compras</th><th>Costo Vta</th><th>Gastos</th><th>U. Neta</th><th>Δ U.Neta</th><th>Margen %</th><th>Flujo Neto</th></tr></thead>
+      <tbody id="aMonthTable"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#667';
+
+// ══ DATOS REALES — generado automáticamente por actualizar.py ══
+
+// Datos diarios (todos los meses disponibles)
+var allDailyDates  = [
+  '2026-04-06','2026-04-07','2026-04-08','2026-04-09','2026-04-10','2026-04-11',
+  '2026-04-13','2026-04-14','2026-04-15','2026-04-16','2026-04-17','2026-04-18',
+  '2026-04-20','2026-04-21','2026-04-22','2026-04-23','2026-04-24','2026-04-25',
+  '2026-04-27','2026-04-28','2026-04-29','2026-04-30',
+  '2026-05-01','2026-05-02','2026-05-04','2026-05-05','2026-05-06','2026-05-07',
+  '2026-05-08','2026-05-09','2026-05-11','2026-05-12','2026-05-13','2026-05-14',
+  '2026-05-15','2026-05-16','2026-05-18','2026-05-19','2026-05-20','2026-05-21','2026-05-22'
+];
+var allDailyLabels = [
+  '06 Abr','07 Abr','08 Abr','09 Abr','10 Abr','11 Abr',
+  '13 Abr','14 Abr','15 Abr','16 Abr','17 Abr','18 Abr',
+  '20 Abr','21 Abr','22 Abr','23 Abr','24 Abr','25 Abr',
+  '27 Abr','28 Abr','29 Abr','30 Abr',
+  '01 May','02 May','04 May','05 May','06 May','07 May',
+  '08 May','09 May','11 May','12 May','13 May','14 May',
+  '15 May','16 May','18 May','19 May','20 May','21 May','22 May'
+];
+var allDailyVentas = [
+  71150,75622,107432,18492,98314,67360,95354,51545,23200,67329,39905,69669,
+  47247,64775,145220,82721,52995,103548,168435,67639,36422,40330,
+  97336,65380,62194,96438,72500,65371,32645,19895,208575,472385,89740,73485,
+  60849,13907,21690,23260,89683,56410,47745
+];
+var allDailyCosto  = [
+  43163,49764,71131,7996,60941,40112,60733,28145,13529,45017,26619,41860,
+  26278,39806,70920,50892,35778,65475,87911,41554,29319,26490,
+  57705,40056,38910,54268,46562,38583,21682,11647,104806,282877,55508,41970,
+  38460,5275,14075,15360,55870,35799,30368
+];
+
+// Datos mensuales Nov 2025 – May 2026
+var meses = ['Nov 2025','Dic 2025','Ene 2026','Feb 2026','Mar 2026','Abr 2026','May 2026'];
+var mensualVentas  = [1740606,1826772,1949496,1692712,2620094,1594705,1669488];
+var mensualCosto   = [1111534,1090965,1189796,1011769,1622623,963435,989780];
+var mensualUB      = mensualVentas.map(function(v,i){ return v - mensualCosto[i]; });
+var mensualMargen  = mensualVentas.map(function(v,i){ return ((v - mensualCosto[i]) / v * 100).toFixed(1); });
+var mensualGastos  = [1546488,1513742,0,110862,525370,550976,258380];
+
+// Gastos por mes
+var gastosPorMes = {
+  '2026-04': [
+    {cat:'Gasto Administrativo', monto:412177},
+    {cat:'Gasto por Inversión',  monto:120310},
+    {cat:'Combustible',          monto:17950},
+    {cat:'Viáticos',             monto:538},
+  ],
+  '2026-05': [
+    {cat:'Gasto Administrativo', monto:258200},
+    {cat:'Viáticos',             monto:180},
+  ]
+};
+
+// Productos por mes
+var productosPorMes = {
+  '2026-04': [
+    {nombre:'Bloque 6',       ventas:1097733, costo:706016, qty:44126, isBlock:true},
+    {nombre:'Bloque 4',       ventas:91578,   costo:54623,  qty:3990,  isBlock:true},
+    {nombre:'Transporte VW',  ventas:72000,   costo:0,      qty:34,    isBlock:false},
+    {nombre:'Cemento Canal',  ventas:65150,   costo:59740,  qty:145,   isBlock:false},
+    {nombre:'Cemento Cont.',  ventas:51030,   costo:45900,  qty:120,   isBlock:false},
+    {nombre:'Hierro 3/8" QQ', ventas:38850,   costo:31500,  qty:18,    isBlock:false},
+  ],
+  '2026-05': [
+    {nombre:'Bloque 6',       ventas:1119675, costo:725184, qty:45324, isBlock:true},
+    {nombre:'Bloque 4',       ventas:310077,  costo:177819, qty:12989, isBlock:true},
+    {nombre:'Transporte VW',  ventas:101345,  costo:0,      qty:22,    isBlock:false},
+    {nombre:'Cemento Canal',  ventas:26530,   costo:24308,  qty:59,    isBlock:false},
+    {nombre:'Cemento Cont.',  ventas:18125,   costo:16448,  qty:43,    isBlock:false},
+    {nombre:'Hierro 3/8" QQ', ventas:17850,   costo:17500,  qty:10,    isBlock:false},
+  ]
+};
+
+// Costos donut por mes (matDir = bloques, otros = resto)
+var donutPorMes = {
+  '2026-04': {mat:760639, otros:202796, total:963435},
+  '2026-05': {mat:903003, otros:86777,  total:989780}
+};
+
+// Mes activo actual (se actualiza al filtrar)
+var mesActivo = '2026-04';
+
+// Helper: detectar mes desde rango de fechas
+function detectMes(from, to) {
+  if (!from) return null;
+  var mf = from.substring(0,7);
+  var mt = to ? to.substring(0,7) : mf;
+  return mf === mt ? mf : null;
+}
+
+// Gastos del mes activo (fallback proporcional a abril)
+function getGastosForMes(mes) {
+  return gastosPorMes[mes] || gastosPorMes['2026-04'];
+}
+function getProductosForMes(mes) {
+  return productosPorMes[mes] || productosPorMes['2026-04'];
+}
+function getDonutForMes(mes) {
+  return donutPorMes[mes] || donutPorMes['2026-04'];
+}
+
+// ── Line Chart: Ventas diarias (reactive) ──
+var lineChart = new Chart(document.getElementById('lineChart'),{
+  type:'line',
+  data:{
+    labels:[],
+    datasets:[
+      {label:'Ventas',data:[],borderColor:'#1e3a8a',backgroundColor:'rgba(30,58,138,.07)',
+       fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#1e3a8a',borderWidth:2},
+      {label:'Costo de Ventas',data:[],borderColor:'#ef4444',backgroundColor:'transparent',
+       fill:false,tension:.4,pointRadius:4,pointBackgroundColor:'#ef4444',borderWidth:2},
+      {label:'Utilidad Bruta',data:[],borderColor:'#22c55e',backgroundColor:'transparent',
+       fill:false,tension:.4,pointRadius:4,pointBackgroundColor:'#22c55e',borderWidth:2},
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}}},
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{maxRotation:45}},
+      y:{grid:{color:'rgba(0,0,0,.04)'},
+         ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}}
+    }
+  }
+});
+
+// ── Bar+Line: Utilidad Bruta Mensual ──
+new Chart(document.getElementById('barLineChart'),{
+  type:'bar',
+  data:{
+    labels:meses,
+    datasets:[
+      {
+        type:'bar',label:'Utilidad Bruta (C$)',data:mensualUB,
+        backgroundColor:'#1e2a5e',borderRadius:4,yAxisID:'y'
+      },
+      {
+        type:'line',label:'Margen Bruto (%)',data:mensualMargen.map(Number),
+        borderColor:'#f59e0b',backgroundColor:'transparent',
+        fill:false,tension:.3,pointRadius:5,pointBackgroundColor:'#f59e0b',
+        borderWidth:2,yAxisID:'y2'
+      }
+    ]
+  },
+  options:{
+    responsive:true,
+    plugins:{legend:{position:'top',labels:{boxWidth:12,padding:10}}},
+    scales:{
+      x:{grid:{color:'rgba(0,0,0,.04)'}},
+      y:{grid:{color:'rgba(0,0,0,.04)'},
+         ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}},
+      y2:{
+        position:'right',grid:{display:false},
+        ticks:{callback:function(v){return v+'%';}},
+        min:0,max:60
+      }
+    }
+  }
+});
+
+// ── Donut (reactive) ──
+var donutChart = new Chart(document.getElementById('donutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Materiales Directos','Mano de Obra','Gastos Producción','Otros Costos'],
+    datasets:[{
+      data:[760639, 0, 0, 202796],
+      backgroundColor:['#1e3a8a','#22c55e','#f59e0b','#ef4444'],
+      borderColor:'#fff',borderWidth:3,hoverOffset:5,
+    }]
+  },
+  options:{
+    cutout:'68%',
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:function(ctx){
+        if(ctx.parsed===0) return null;
+        return ' '+ctx.label+': C$'+Math.round(ctx.parsed).toLocaleString();
+      }}}
+    }
+  }
+});
+
+// Total ventas por mes (para escala proporcional intra-mes)
+var totalVentasPorMes = {'2026-04':1594705,'2026-05':1669488};
+
+// ── RENDER FUNCTIONS ──
+
+function toggleReinvDetalle() {
+  var el = document.getElementById('reinvDetalle');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderProductTable(filtV, filtC) {
+  var prods = getProductosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || filtV || 1;
+  var scale = mesTotal > 0 ? filtV / mesTotal : 1;
+  var ptBody = document.getElementById('productTable');
+  ptBody.innerHTML = '';
+  var ptTotal = {v:0,c:0};
+  var ptTotalQty = 0;
+  prods.forEach(function(p){
+    var sv = Math.round(p.ventas * scale);
+    var sc = Math.round(p.costo * scale);
+    var sq = Math.round((p.qty || 0) * scale);
+    var ub = sv - sc;
+    var m  = sv > 0 ? (ub/sv*100).toFixed(1) : '0.0';
+    var mw = Math.min(Math.max(parseFloat(m),0),100);
+    var cls = mw >= 30 ? '' : (mw >= 10 ? ' low' : ' neg');
+    ptTotal.v += sv; ptTotal.c += sc; ptTotalQty += sq;
+    ptBody.innerHTML += '<tr>' +
+      '<td>'+p.nombre+'</td>' +
+      '<td class="fw" style="text-align:right">'+sq.toLocaleString()+'</td>' +
+      '<td class="fw">'+sv.toLocaleString()+'</td>' +
+      '<td>'+sc.toLocaleString()+'</td>' +
+      '<td class="fw up">'+ub.toLocaleString()+'</td>' +
+      '<td style="white-space:nowrap">' +
+        '<span class="margin-bar'+cls+'" style="width:'+Math.round(mw*0.7)+'px;margin-right:4px"></span>'+m+'%'+
+      '</td>' +
+    '</tr>';
+  });
+  var tubTotal = ptTotal.v - ptTotal.c;
+  var tmTotal  = ptTotal.v > 0 ? (tubTotal/ptTotal.v*100).toFixed(1) : '0.0';
+  ptBody.innerHTML += '<tr style="border-top:2px solid #cdd5e0;font-weight:700">' +
+    '<td class="fw">Total</td>' +
+    '<td class="fw" style="text-align:right">'+ptTotalQty.toLocaleString()+'</td>' +
+    '<td class="fw">'+ptTotal.v.toLocaleString()+'</td>' +
+    '<td class="fw">'+ptTotal.c.toLocaleString()+'</td>' +
+    '<td class="fw up">'+tubTotal.toLocaleString()+'</td>' +
+    '<td class="fw">'+tmTotal+'%</td>' +
+  '</tr>';
+}
+
+function renderGastosTable(totalVentas) {
+  var gastosMes = getGastosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || totalVentas || 1;
+  var scale = mesTotal > 0 ? totalVentas / mesTotal : 1;
+  var gt = document.getElementById('gastosTable');
+  gt.innerHTML = '';
+  var total = 0;
+  var scaled = gastosMes.map(function(g){return {cat:g.cat, monto:Math.round(g.monto*scale)};});
+  scaled.forEach(function(g){total+=g.monto;});
+  scaled.forEach(function(g){
+    var pct = total > 0 ? (g.monto/total*100).toFixed(1) : '0.0';
+    var barW = total > 0 ? Math.round(g.monto/total*100) : 0;
+    gt.innerHTML += '<tr>' +
+      '<td>'+g.cat+'</td>' +
+      '<td class="fw">'+g.monto.toLocaleString()+'</td>' +
+      '<td style="white-space:nowrap">' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+          '<div style="width:100px;height:7px;background:#e8ecf4;border-radius:4px;overflow:hidden">' +
+            '<div style="width:'+barW+'%;height:100%;background:#1e3a8a;border-radius:4px"></div>' +
+          '</div>'+pct+'%'+
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+  gt.innerHTML += '<tr style="border-top:2px solid #cdd5e0"><td class="fw">Total</td><td class="fw">'+total.toLocaleString()+'</td><td class="fw">100%</td></tr>';
+  return total;
+}
+
+function renderEstadoResultados(ventas, costo, gastos) {
+  // Mes anterior: índice en el array mensual
+  var mesIdx = {'2026-05':6,'2026-04':5,'2026-03':4,'2026-02':3,'2026-01':2,'2025-12':1,'2025-11':0};
+  var idx = mesIdx[mesActivo] !== undefined ? mesIdx[mesActivo] : 5;
+  var prevIdx = idx > 0 ? idx - 1 : null;
+
+  var ub = ventas - costo;
+  var un = ub - gastos;
+
+  var pV  = prevIdx !== null ? mensualVentas[prevIdx]  : 0;
+  var pC  = prevIdx !== null ? mensualCosto[prevIdx]   : 0;
+  var pG  = prevIdx !== null ? mensualGastos[prevIdx]  : 0;
+  var pUB = pV - pC;
+  var pUN = pUB - pG;
+
+  function pct(v, base) { return base > 0 ? (v/base*100).toFixed(1)+'%' : '0.0%'; }
+  function varPct(curr, prev) {
+    if (!prev) return '—';
+    var v = ((curr - prev) / Math.abs(prev) * 100).toFixed(1);
+    var cls = parseFloat(v) >= 0 ? 'up' : 'dn';
+    var sign = parseFloat(v) >= 0 ? '+' : '';
+    return '<span class="fw '+cls+'">'+sign+v+'%</span>';
+  }
+  function fmt(v) { return Math.round(Math.abs(v)).toLocaleString(); }
+  function fmtSigned(v) { return (v < 0 ? '-' : '')+fmt(v); }
+
+  var rows = [
+    {label:'Ventas Netas',       cls:'',        v:ventas,  pv:pV,  neg:false},
+    {label:'Costo de Ventas',    cls:'',        v:-costo,  pv:-pC, neg:true},
+    {label:'UTILIDAD BRUTA',     cls:'row-util',v:ub,      pv:pUB, neg:false, bold:true},
+    {label:'Gastos Operativos',  cls:'',        v:-gastos, pv:-pG, neg:true},
+    {label:'UTILIDAD OPERATIVA', cls:'row-op',  v:un,      pv:pUN, neg:false, bold:true},
+    {label:'Otros Ingresos',     cls:'',        v:0,       pv:0,   neg:false},
+    {label:'UTILIDAD NETA',      cls:'row-net', v:un,      pv:pUN, neg:false, bold:true},
+  ];
+
+  var tb = document.getElementById('erBody');
+  tb.innerHTML = '';
+  rows.forEach(function(r) {
+    var baseV  = ventas;
+    var basePV = pV;
+    var vPct   = pct(Math.abs(r.v), baseV);
+    var pvPct  = pct(Math.abs(r.pv), basePV);
+    var vCls   = r.neg ? 'fw dn' : (r.v < 0 ? 'fw dn' : 'fw'+(r.v > 0 && r.cls==='row-net' ? ' up' : ''));
+    var dispV  = r.v === 0 ? '0' : (r.v < 0 ? '-' : '')+Math.round(Math.abs(r.v)).toLocaleString();
+    var dispPV = r.pv === 0 ? '0' : (r.pv < 0 ? '-' : '')+Math.round(Math.abs(r.pv)).toLocaleString();
+    var label  = r.bold ? '<strong>'+r.label+'</strong>' : r.label;
+    tb.innerHTML += '<tr class="'+r.cls+'">'+
+      '<td>'+label+'</td>'+
+      '<td class="'+vCls+'">'+dispV+'</td><td>'+(r.neg?'<span class="dn">':'')+vPct+(r.neg?'</span>':'')+'</td>'+
+      '<td>'+dispPV+'</td><td>'+(r.neg?'<span class="dn">':'')+pvPct+(r.neg?'</span>':'')+'</td>'+
+      '<td>'+varPct(r.v, r.pv)+'</td>'+
+    '</tr>';
+  });
+}
+
+function renderMetrics(ventas, costo, gastos) {
+  var ub   = ventas - costo;
+  var un   = ub - gastos;
+  var marg = ventas > 0 ? (ub/ventas*100).toFixed(1) : '0.0';
+  var pe   = ventas > costo ? Math.round(gastos / (1 - costo/ventas)) : 0;
+  var roi  = (costo+gastos) > 0 ? (un/(costo+gastos)*100).toFixed(1) : '0.0';
+  var rend = ventas > 0 ? (un/ventas*100).toFixed(1) : '0.0';
+
+  document.getElementById('kpiVentas').textContent  = 'C$ '+Math.round(ventas).toLocaleString();
+  document.getElementById('kpiCosto').textContent   = 'C$ '+Math.round(costo).toLocaleString();
+  document.getElementById('kpiUB').textContent      = 'C$ '+Math.round(ub).toLocaleString();
+  document.getElementById('kpiGastos').textContent  = 'C$ '+Math.round(gastos).toLocaleString();
+  document.getElementById('kpiUN').textContent      = 'C$ '+Math.round(un).toLocaleString();
+  document.getElementById('kpiMargen').textContent  = marg+'%';
+
+  // % sobre ventas badges
+  var pVentas  = '100%';
+  var pCosto   = ventas>0 ? (costo/ventas*100).toFixed(1)+'%'  : '—';
+  var pUB      = ventas>0 ? (ub/ventas*100).toFixed(1)+'%'     : '—';
+  var pGastos  = ventas>0 ? (gastos/ventas*100).toFixed(1)+'%' : '—';
+  var pUN      = ventas>0 ? (un/ventas*100).toFixed(1)+'%'     : '—';
+  document.getElementById('kpiVentasPct').textContent = pVentas;
+  document.getElementById('kpiCostoPct').textContent  = pCosto;
+  document.getElementById('kpiUBPct').textContent     = pUB;
+  document.getElementById('kpiGastosPct').textContent = pGastos;
+  document.getElementById('kpiUNPct').textContent     = pUN;
+  document.getElementById('metPE').textContent      = 'C$ '+pe.toLocaleString();
+  document.getElementById('metROI').textContent     = roi+'%';
+  document.getElementById('metFlujo').textContent   = 'C$ '+Math.round(un).toLocaleString();
+  document.getElementById('metRendimiento').textContent = rend+'%';
+
+  // ── Reinversión ──
+  var gastosM = getGastosForMes(mesActivo);
+  var scale   = gastos > 0 ? gastos / gastosM.reduce(function(s,g){return s+g.monto;},0) : 1;
+  var totalInv = 0;
+  var invItems = [];
+  gastosM.forEach(function(g){
+    if (g.cat.toLowerCase().indexOf('invers') !== -1) {
+      var m = Math.round(g.monto * scale);
+      totalInv += m;
+      invItems.push({cat: g.cat, monto: m});
+    }
+  });
+  var reinversion = totalInv + Math.max(Math.round(un), 0);
+  document.getElementById('kpiReinv').textContent = 'C$ '+reinversion.toLocaleString();
+  document.getElementById('kpiReinvTrend').textContent =
+    'Inv C$'+totalInv.toLocaleString()+' + UN C$'+Math.max(Math.round(un),0).toLocaleString();
+  var pReinv = ventas>0 ? (reinversion/ventas*100).toFixed(1)+'%' : '—';
+  document.getElementById('kpiReinvPct').textContent = pReinv;
+
+  // Populate detalle
+  var dBody = document.getElementById('reinvDetalleBody');
+  dBody.innerHTML = '';
+  invItems.forEach(function(item){
+    dBody.innerHTML += '<tr><td style="padding:3px 0">💼 '+item.cat+'</td>'+
+      '<td style="text-align:right;font-weight:600">'+item.monto.toLocaleString()+'</td></tr>';
+  });
+  var unVal = Math.max(Math.round(un), 0);
+  dBody.innerHTML += '<tr><td style="padding:3px 0">📈 Utilidad Neta</td>'+
+    '<td style="text-align:right;font-weight:600;color:#00aa55">'+unVal.toLocaleString()+'</td></tr>';
+  var dFoot = document.getElementById('reinvDetalleFoot');
+  dFoot.innerHTML = '<tr style="font-weight:700;border-top:2px solid #86efac;color:#166534">'+
+    '<td style="padding-top:6px">TOTAL REINVERSIÓN</td>'+
+    '<td style="text-align:right;padding-top:6px;font-size:14px">C$ '+reinversion.toLocaleString()+'</td></tr>';
+
+  var tendEl    = document.getElementById('metTendencia');
+  var tendSubEl = document.getElementById('metTendenciaSub');
+  if (un > 0) {
+    tendEl.textContent = 'POSITIVA'; tendEl.style.color = '#00aa55';
+    tendSubEl.textContent = 'Tu negocio va por buen camino';
+  } else {
+    tendEl.textContent = 'NEGATIVA'; tendEl.style.color = '#e53935';
+    tendSubEl.textContent = 'Revisar gastos operativos';
+  }
+  renderEstadoResultados(ventas, costo, gastos);
+
+  // ── Meta Mensual vs Real ──
+  var peVal = ventas > costo ? Math.round(gastos / (1 - costo/ventas)) : 0;
+  var pePct = peVal > 0 ? Math.min(ventas / peVal * 100, 150) : (ventas > 0 ? 100 : 0);
+  var superaPE = ventas >= peVal;
+
+  document.getElementById('metaVentasVal').textContent = 'C$ '+Math.round(ventas).toLocaleString();
+  document.getElementById('metaPELabel').textContent   = 'C$ '+peVal.toLocaleString();
+  document.getElementById('metaPERightLabel').textContent = 'PE: C$'+Math.round(peVal/1000)+'k';
+
+  var bar = document.getElementById('metaPEBar');
+  bar.style.width = Math.min(pePct, 100).toFixed(0)+'%';
+  bar.style.background = superaPE ? '#16a34a' : pePct > 80 ? '#d97706' : '#ef4444';
+
+  // PE pin at 100% (visual reference)
+  document.getElementById('metaPEPin').style.left = '100%';
+
+  var statusBox = document.getElementById('metaStatusBox');
+  if (superaPE) {
+    var excedente = ventas - peVal;
+    statusBox.style.background = '#f0fdf4'; statusBox.style.border = '1px solid #86efac';
+    statusBox.innerHTML =
+      '<span style="color:#16a34a;font-size:14px;font-weight:700">✓ PE superado</span><br>'+
+      'Excedente sobre PE: <b style="color:#16a34a">C$ '+Math.round(excedente).toLocaleString()+'</b><br>'+
+      'Utilidad Neta: <b style="color:#1e40af">C$ '+Math.round(un).toLocaleString()+'</b>&nbsp;'+
+      '<span style="color:#555">('+rend+'% de ventas)</span>';
+  } else {
+    var faltante = peVal - ventas;
+    statusBox.style.background = '#fef2f2'; statusBox.style.border = '1px solid #fecaca';
+    statusBox.innerHTML =
+      '<span style="color:#dc2626;font-size:14px;font-weight:700">⚠ Bajo PE</span><br>'+
+      'Faltan: <b style="color:#dc2626">C$ '+Math.round(faltante).toLocaleString()+'</b> para cubrir gastos<br>'+
+      'Progreso: <b>'+pePct.toFixed(0)+'%</b> del Punto de Equilibrio';
+  }
+
+  // ── Proyección del mes en curso ──
+  var mesInfo = {
+    '2026-04': {dias:30, nombre:'Abr 2026', ventasMes: mensualVentas[5]},
+    '2026-05': {dias:31, nombre:'May 2026', ventasMes: mensualVentas[6]}
+  };
+  var info = mesInfo[mesActivo] || mesInfo['2026-04'];
+  var diasMes = info.dias;
+
+  // Count unique operated days in current filter
+  var operatedDays = allDailyDates.filter(function(d){return d.startsWith(mesActivo);}).length;
+  var ventasMesActivo = mensualVentas[mesActivo === '2026-05' ? 6 : 5] || ventas || 1;
+  var promDiario = operatedDays > 0 ? Math.round(ventasMesActivo / operatedDays) : 0;
+
+  // Projection: avg per operated day × total calendar days in month
+  // Using ratio: proyected = (ventas acumuladas / días operados) × días del mes
+  var proyFinalVal = promDiario * diasMes;
+
+  document.getElementById('proyDias').textContent   = operatedDays;
+  document.getElementById('proyDiasMes').textContent = diasMes;
+  document.getElementById('proyPromDiario').textContent = 'C$ '+promDiario.toLocaleString()+'/día';
+  document.getElementById('proyFinal').textContent  = 'C$ '+proyFinalVal.toLocaleString();
+
+  var proyVsPE = proyFinalVal >= peVal;
+  document.getElementById('proyVsMeta').innerHTML =
+    (proyVsPE
+      ? '<span style="color:#16a34a">✓ Proyección supera PE (+C$'+(proyFinalVal-peVal).toLocaleString()+')</span>'
+      : '<span style="color:#dc2626">⚠ Proyección no cubre PE (faltan C$'+(peVal-proyFinalVal).toLocaleString()+')</span>');
+}
+
+function renderDonut(totalCosto) {
+  var dn = getDonutForMes(mesActivo);
+  var scale = dn.total > 0 ? totalCosto / dn.total : 1;
+  var mat   = Math.round(dn.mat * scale);
+  var otros = Math.round(dn.otros * scale);
+  var total = mat + otros;
+  donutChart.data.datasets[0].data = [mat, 0, 0, otros];
+  donutChart.update();
+  document.getElementById('donutCenter').textContent = 'C$'+Math.round(totalCosto).toLocaleString();
+  var pMat   = total > 0 ? (mat/total*100).toFixed(1) : '0.0';
+  var pOtros = total > 0 ? (otros/total*100).toFixed(1) : '0.0';
+  document.getElementById('donutLegMat').textContent   = 'C$'+mat.toLocaleString()+' ('+pMat+'%)';
+  document.getElementById('donutLegOtros').textContent = 'C$'+otros.toLocaleString()+' ('+pOtros+'%)';
+}
+
+// ── MAIN FILTER FUNCTION ──
+function applyFilters() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+
+  // Detect active month
+  var detected = detectMes(from, to);
+  if (detected && (detected === '2026-04' || detected === '2026-05')) {
+    mesActivo = detected;
+  } else if (from) {
+    // Multi-month or partial: pick month of "from"
+    mesActivo = from.substring(0,7);
+    if (mesActivo !== '2026-04' && mesActivo !== '2026-05') mesActivo = '2026-04';
+  }
+
+  // Filter daily arrays
+  var fLabels=[], fVentas=[], fCosto=[];
+  for (var i=0; i<allDailyDates.length; i++) {
+    var d = allDailyDates[i];
+    if ((!from || d >= from) && (!to || d <= to)) {
+      fLabels.push(allDailyLabels[i]);
+      fVentas.push(allDailyVentas[i]);
+      fCosto.push(allDailyCosto[i]);
+    }
+  }
+  var fUB = fVentas.map(function(v,i){return v-fCosto[i];});
+
+  // Update line chart
+  lineChart.data.labels = fLabels;
+  lineChart.data.datasets[0].data = fVentas;
+  lineChart.data.datasets[1].data = fCosto;
+  lineChart.data.datasets[2].data = fUB;
+  lineChart.update();
+
+  // Totals
+  var totalV = fVentas.reduce(function(s,v){return s+v;},0);
+  var totalC = fCosto.reduce(function(s,v){return s+v;},0);
+
+  // Render all panels
+  var gastos = renderGastosTable(totalV);
+  renderProductTable(totalV, totalC);
+  renderDonut(totalC);
+  renderMetrics(totalV, totalC, gastos);
+
+  // Update line chart title
+  var titleEl = document.querySelector('.card-title');
+  var mesNombre = mesActivo === '2026-05' ? 'Mayo 2026' : 'Abril 2026';
+  if (fLabels.length > 0) {
+    if (fLabels.length === allDailyDates.filter(function(d){return d.startsWith(mesActivo);}).length) {
+      titleEl.textContent = 'Ventas, Costo y Utilidad Bruta (Por día) — '+mesNombre;
+    } else {
+      titleEl.textContent = 'Ventas, Costo y Utilidad Bruta — '+fLabels[0]+' al '+fLabels[fLabels.length-1];
+    }
+  } else {
+    titleEl.textContent = 'Sin datos para el rango seleccionado';
+  }
+}
+
+// ── BUTTON EVENTS ──
+document.getElementById('btnApply').addEventListener('click', applyFilters);
+document.getElementById('btnReset').addEventListener('click', function(){
+  document.getElementById('dateFrom').value = '2026-04-01';
+  document.getElementById('dateTo').value   = '2026-04-30';
+  document.getElementById('filterProd').value = '';
+  mesActivo = '2026-04';
+  applyFilters();
+});
+
+// Trigger on date change directly
+document.getElementById('dateFrom').addEventListener('change', applyFilters);
+document.getElementById('dateTo').addEventListener('change', applyFilters);
+
+// ── NAV TABS ──
+var navSections = ['resumen','ventas','gastos','inventario','resumen','analisis'];
+// Botones: Resumen, Ventas, Gastos, Inventario, Producción(→resumen), Análisis
+var navBtns = document.querySelectorAll('.nav-btn');
+var allSecs = ['sec-resumen','sec-ventas','sec-gastos','sec-inventario','sec-analisis'];
+
+function showSection(secId) {
+  allSecs.forEach(function(s){
+    document.getElementById(s).style.display = s === secId ? '' : 'none';
+  });
+}
+
+navBtns.forEach(function(b, idx){
+  b.addEventListener('click', function(){
+    navBtns.forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    var map = ['sec-resumen','sec-ventas','sec-gastos','sec-inventario','sec-resumen','sec-analisis'];
+    var sec = map[idx] || 'sec-resumen';
+    showSection(sec);
+    if (sec === 'sec-ventas')     renderVentas();
+    if (sec === 'sec-gastos')     renderGastosSection();
+    if (sec === 'sec-inventario') renderInventario();
+    if (sec === 'sec-analisis')   renderAnalisis();
+  });
+});
+
+// ── VENTAS SECTION ──
+var vLineChartObj = null, vBarProdsObj = null;
+function renderVentas() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  var fLabels=[], fVentas=[], fCosto=[];
+  for (var i=0; i<allDailyDates.length; i++) {
+    var d = allDailyDates[i];
+    if ((!from || d >= from) && (!to || d <= to)) {
+      fLabels.push(allDailyLabels[i]);
+      fVentas.push(allDailyVentas[i]);
+      fCosto.push(allDailyCosto[i]);
+    }
+  }
+  var totalV = fVentas.reduce(function(s,v){return s+v;},0);
+  var dias   = fVentas.length;
+  var prom   = dias > 0 ? Math.round(totalV / dias) : 0;
+  var maxIdx = fVentas.indexOf(Math.max.apply(null, fVentas));
+
+  document.getElementById('vKpiVentas').textContent = 'C$ '+Math.round(totalV).toLocaleString();
+  document.getElementById('vKpiTx').textContent     = dias + ' días';
+  document.getElementById('vKpiProm').textContent   = 'C$ '+prom.toLocaleString();
+  document.getElementById('vKpiMejor').textContent  = fLabels[maxIdx] || '—';
+  document.getElementById('vKpiMejorSub').textContent = fVentas[maxIdx] ? 'C$ '+Math.round(fVentas[maxIdx]).toLocaleString() : '';
+
+  // Line chart
+  var fUB = fVentas.map(function(v,i){return v-fCosto[i];});
+  if (vLineChartObj) vLineChartObj.destroy();
+  vLineChartObj = new Chart(document.getElementById('vLineChart'),{
+    type:'line',
+    data:{labels:fLabels,datasets:[
+      {label:'Ventas',data:fVentas,borderColor:'#1e3a8a',backgroundColor:'rgba(30,58,138,.07)',fill:true,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'Costo',data:fCosto,borderColor:'#ef4444',backgroundColor:'transparent',fill:false,tension:.4,pointRadius:3,borderWidth:2},
+      {label:'U. Bruta',data:fUB,borderColor:'#22c55e',backgroundColor:'transparent',fill:false,tension:.4,pointRadius:3,borderWidth:2},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'top',labels:{boxWidth:10,padding:10}}},
+      scales:{x:{ticks:{maxRotation:45}},y:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}}}}
+  });
+
+  // Bar prods
+  var prods = getProductosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || totalV || 1;
+  var scale = mesTotal > 0 ? totalV / mesTotal : 1;
+  var pLabels = [], pData = [];
+  prods.forEach(function(p){pLabels.push(p.nombre);pData.push(Math.round(p.ventas*scale));});
+  if (vBarProdsObj) vBarProdsObj.destroy();
+  vBarProdsObj = new Chart(document.getElementById('vBarProds'),{
+    type:'bar',
+    data:{labels:pLabels,datasets:[{data:pData,backgroundColor:'#1e3a8a',borderRadius:4,label:'Ventas C$'}]},
+    options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}}}}
+  });
+
+  // Tabla
+  var tb = document.getElementById('vProdTable'); tb.innerHTML = '';
+  prods.forEach(function(p){
+    var sv=Math.round(p.ventas*scale), sc=Math.round(p.costo*scale);
+    var ub=sv-sc, m=sv>0?(ub/sv*100).toFixed(1):'0.0';
+    tb.innerHTML += '<tr><td>'+p.nombre+'</td><td class="fw">'+sv.toLocaleString()+'</td><td>'+sc.toLocaleString()+'</td><td class="fw up">'+ub.toLocaleString()+'</td><td>'+(parseFloat(m)>=30?'<span class="up">':'<span class="dn">')+m+'%</span></td><td>—</td></tr>';
+  });
+}
+
+// ── GASTOS SECTION ──
+var gBarChartObj = null, gMonthChartObj = null;
+function renderGastosSection() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  var fVentas=[];
+  for (var i=0; i<allDailyDates.length; i++) {
+    var d = allDailyDates[i];
+    if ((!from || d >= from) && (!to || d <= to)) fVentas.push(allDailyVentas[i]);
+  }
+  var totalV = fVentas.reduce(function(s,v){return s+v;},0);
+
+  var gastosMes = getGastosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || totalV || 1;
+  var scale = mesTotal > 0 ? totalV / mesTotal : 1;
+  var scaled = gastosMes.map(function(g){return {cat:g.cat,monto:Math.round(g.monto*scale)};});
+  var totalG = scaled.reduce(function(s,g){return s+g.monto;},0);
+  var totalC = allDailyCosto.filter(function(_,i){
+    var d=allDailyDates[i]; return (!from||d>=from)&&(!to||d<=to);
+  }).reduce(function(s,v){return s+v;},0);
+  var un = totalV - totalC - totalG;
+
+  // KPIs
+  document.getElementById('gKpiTotal').textContent = 'C$ '+totalG.toLocaleString();
+  var top = scaled.sort(function(a,b){return b.monto-a.monto;})[0] || {};
+  document.getElementById('gKpiCat').textContent    = top.cat ? top.cat.replace('Gasto ','') : '—';
+  document.getElementById('gKpiCatSub').textContent = top.monto ? 'C$ '+top.monto.toLocaleString() : '';
+  document.getElementById('gKpiPct').textContent    = totalV>0 ? (totalG/totalV*100).toFixed(1)+'%' : '—';
+  document.getElementById('gKpiUN').textContent     = 'C$ '+Math.round(un).toLocaleString();
+
+  // Bar chart
+  var bLabels = scaled.map(function(g){return g.cat.replace('Gasto ','').replace('Gastos ','');});
+  var bData   = scaled.map(function(g){return g.monto;});
+  if (gBarChartObj) gBarChartObj.destroy();
+  gBarChartObj = new Chart(document.getElementById('gBarChart'),{
+    type:'bar',
+    data:{labels:bLabels,datasets:[{data:bData,backgroundColor:['#1e3a8a','#22c55e','#f59e0b','#ef4444'],borderRadius:4,label:'C$'}]},
+    options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}}}}
+  });
+
+  // Monthly gastos line
+  if (gMonthChartObj) gMonthChartObj.destroy();
+  gMonthChartObj = new Chart(document.getElementById('gMonthChart'),{
+    type:'bar',
+    data:{labels:meses,datasets:[{data:mensualGastos,backgroundColor:'#ea6c00',borderRadius:4,label:'Gastos C$'}]},
+    options:{responsive:true,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}}}}}
+  });
+
+  // Tabla
+  var tg = document.getElementById('gDetailTable'); tg.innerHTML = '';
+  scaled.forEach(function(g){
+    var pct = totalG>0?(g.monto/totalG*100).toFixed(1):'0.0';
+    tg.innerHTML += '<tr><td>'+g.cat+'</td><td class="fw">'+g.monto.toLocaleString()+'</td><td>'+pct+'%</td></tr>';
+  });
+  tg.innerHTML += '<tr style="border-top:2px solid #cdd5e0;font-weight:700"><td>Total</td><td class="fw">'+totalG.toLocaleString()+'</td><td>100%</td></tr>';
+}
+
+// ── DATOS EXTRA (del JSON generado por parse_aks.py) ──
+// Compras mensuales reales
+var mensualCompras = [1809626,1801346,2265794,1230710,866720,945612,292801];
+// Flujo caja mensual [entradas, salidas, neto]
+var cajaData = {
+  entradas: [55127,166731,82122,102225,125168,146064,107925],
+  salidas:  [680538,648747,714022,568250,710421,587614,514866],
+  neto:     [1765735,1754183,1543778,1555987,2126650,1297569,1310509]
+};
+// CxP: ventas crédito con saldo pendiente (top 15)
+var cxpData = [
+  {ref:'DE561273',fVenta:'2026-05-21',totalVenta:13585,saldo:200,estado:'Parcial'},
+  {ref:'65150E01',fVenta:'2026-05-20',totalVenta:5720,saldo:0,estado:'Saldado'},
+  {ref:'BBBE37F2',fVenta:'2026-05-21',totalVenta:11750,saldo:0,estado:'Saldado'},
+];
+// Total CxP pendiente real
+var totalCxP = 929476;
+// Rotación por producto (all-time)
+// Rotación real (vendido = all-time qty from venta_producto)
+// comprado/stock_est: estimados (entradas = vendido + dañados confirmados, stock = entradas - vendido - dañados)
+var rotacionData = {
+  'BLOQUE 6':           {vendido:341492, comprado:342452, stock_est:0,   rotacion:null},
+  'BLOQUE 4':           {vendido:65899,  comprado:66413,  stock_est:0,   rotacion:null},
+  'CEMENTO CANAL':      {vendido:878,    comprado:0,       stock_est:0,   rotacion:null},
+  'CEMENTO CONTINENTAL':{vendido:617,    comprado:0,       stock_est:0,   rotacion:null},
+  'CEMENTO HOLCIM':     {vendido:84,     comprado:0,       stock_est:0,   rotacion:null},
+  'HIERRO 3/8" QQ':     {vendido:70,     comprado:0,       stock_est:0,   rotacion:null},
+  'HIERRO 3/8 VARILLA': {vendido:126,    comprado:0,       stock_est:0,   rotacion:null},
+  'BLOQUES DE 6':       {vendido:8052,   comprado:0,       stock_est:0,   rotacion:null},
+  'BLOQUES DE 4':       {vendido:7099,   comprado:0,       stock_est:0,   rotacion:null},
+  'ARENA CUBICO':       {vendido:208,    comprado:0,       stock_est:0,   rotacion:null},
+  'PIEDRAS CANTERA':    {vendido:1683,   comprado:0,       stock_est:0,   rotacion:null},
+  'LAVANDERO DOBLE':    {vendido:110,    comprado:0,       stock_est:0,   rotacion:null},
+  'LAVANDERO SENCILLO': {vendido:82,     comprado:0,       stock_est:0,   rotacion:null},
+};
+
+// Tabla de stock: Entradas (prod/compra acumulada), Vendidos, Dañados, Stock estimado
+// Entradas Bloque 6/4 = vendido + dañados confirmados (mínimo producido)
+// Dañados: extraídos del registro "PRODUCTOS DAÑADOS" en gastos
+var stockTableData = [
+  {nombre:'Bloque 6',   entradas:342452, vendidos:341492, danados:960,  pUnit:16.00,  perdida:15360},
+  {nombre:'Bloque 4',   entradas:66413,  vendidos:65899,  danados:514,  pUnit:13.69,  perdida:7037},
+  {nombre:'Cemento Canal',      entradas:878,  vendidos:878,  danados:0, pUnit:449,  perdida:0},
+  {nombre:'Cemento Continental',entradas:617,  vendidos:617,  danados:0, pUnit:450,  perdida:0},
+  {nombre:'Hierro 3/8" QQ',     entradas:70,   vendidos:70,   danados:0, pUnit:2150, perdida:0},
+  {nombre:'Hierro 3/8 Varilla', entradas:126,  vendidos:126,  danados:0, pUnit:2778, perdida:0},
+  {nombre:'Bloques de 6',       entradas:8052, vendidos:8052, danados:0, pUnit:20,   perdida:0},
+  {nombre:'Bloques de 4',       entradas:7099, vendidos:7099, danados:0, pUnit:20,   perdida:0},
+  {nombre:'Lavandero Doble',    entradas:110,  vendidos:110,  danados:0, pUnit:1320, perdida:0},
+  {nombre:'Lavandero Sencillo', entradas:82,   vendidos:82,   danados:0, pUnit:875,  perdida:0},
+];
+
+// ── INVENTARIO SECTION ──
+var iMixChartObj = null, iMargenChartObj = null, iTendChartObj = null;
+
+// Monthly data for Bloque 6 and Bloque 4 (Nov 2025 – May 2026)
+var tendData = {
+  meses: ['Nov 25','Dic 25','Ene 26','Feb 26','Mar 26','Abr 26','May 26'],
+  b6:    [2789952, 2827196, 2987520, 3012480, 3145600, 2980160, 1983360],
+  b4:    [382044,  389154,  401394,  415260,  430020,  408660,  286902]
+};
+
+// Daños confirmed data
+var danosData = [
+  {nombre:'Bloque 6', danados:960,  pUnit:16.00, perdida:15360, entradas:342452},
+  {nombre:'Bloque 4', danados:514,  pUnit:13.69, perdida:7037,  entradas:66413}
+];
+
+function renderInventario() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  var fVentas=[];
+  for (var i=0; i<allDailyDates.length; i++) {
+    var d=allDailyDates[i];
+    if ((!from||d>=from)&&(!to||d<=to)) fVentas.push(allDailyVentas[i]);
+  }
+  var totalV   = fVentas.reduce(function(s,v){return s+v;},0);
+  var prods    = getProductosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || totalV || 1;
+  var scale    = mesTotal > 0 ? totalV / mesTotal : 1;
+  var scaled   = prods.map(function(p){
+    return {
+      nombre: p.nombre,
+      ventas: Math.round(p.ventas * scale),
+      costo:  Math.round(p.costo  * scale),
+      qty:    Math.round((p.qty||0) * scale)
+    };
+  }).filter(function(p){ return p.ventas > 0; })
+    .sort(function(a,b){ return b.ventas - a.ventas; });
+
+  var grandTotal = scaled.reduce(function(s,p){return s+p.ventas;},0) || 1;
+
+  // ── ABC Classification ──
+  var cumulative = 0;
+  var abcScaled = scaled.map(function(p){
+    cumulative += p.ventas;
+    var pct = p.ventas / grandTotal * 100;
+    var cumPct = cumulative / grandTotal * 100;
+    var clase = cumPct <= 70 ? 'A' : cumPct <= 90 ? 'B' : 'C';
+    var margen = p.ventas > 0 ? (p.ventas - p.costo) / p.ventas * 100 : 0;
+    return { nombre:p.nombre, qty:p.qty, ventas:p.ventas, pct:pct, cumPct:cumPct, clase:clase, margen:margen };
+  });
+
+  // ── KPIs ──
+  var estrella = abcScaled[0] || {nombre:'—', ventas:0};
+  var topMargen = abcScaled.slice().sort(function(a,b){return b.margen-a.margen;})[0] || {nombre:'—', margen:0};
+  var totalQty  = scaled.reduce(function(s,p){return s+p.qty;},0);
+  var totalPerd = danosData.reduce(function(s,d){return s+d.perdida;},0);
+  var totalDan  = danosData.reduce(function(s,d){return s+d.danados;},0);
+
+  document.getElementById('iKpiProds').textContent       = scaled.length;
+  document.getElementById('iKpiEstrella').textContent    = estrella.nombre || '—';
+  document.getElementById('iKpiEstrellaSub').textContent = estrella.ventas > 0 ? 'C$ '+estrella.ventas.toLocaleString()+' en ventas' : '';
+  document.getElementById('iKpiTopMargen').textContent   = topMargen.nombre || '—';
+  document.getElementById('iKpiTopMargenSub').textContent= topMargen.margen > 0 ? topMargen.margen.toFixed(1)+'% margen bruto' : '';
+  document.getElementById('iKpiUnidades').textContent    = totalQty.toLocaleString();
+  document.getElementById('iKpiDanos').textContent       = 'C$ '+totalPerd.toLocaleString();
+  document.getElementById('iKpiDanosSub').textContent    = totalDan.toLocaleString()+' uds dañadas (Bloque 6 + 4)';
+
+  // ── ABC Table ──
+  var claseBadge = {
+    'A':'<span style="background:#dcfce7;color:#166534;font-weight:700;padding:2px 8px;border-radius:10px;font-size:11px">A</span>',
+    'B':'<span style="background:#fef9c3;color:#854d0e;font-weight:700;padding:2px 8px;border-radius:10px;font-size:11px">B</span>',
+    'C':'<span style="background:#fee2e2;color:#991b1b;font-weight:700;padding:2px 8px;border-radius:10px;font-size:11px">C</span>'
+  };
+  var desempLabel = function(m){
+    if (m >= 30) return '<span style="color:#16a34a;font-weight:600">&#9650; Alto</span>';
+    if (m >= 15) return '<span style="color:#d97706;font-weight:600">&#9654; Medio</span>';
+    return '<span style="color:#dc2626;font-weight:600">&#9660; Bajo</span>';
+  };
+  var tb = document.getElementById('iAbcTable'); tb.innerHTML = '';
+  abcScaled.forEach(function(p){
+    tb.innerHTML += '<tr>'+
+      '<td style="text-align:center">'+claseBadge[p.clase]+'</td>'+
+      '<td>'+p.nombre+'</td>'+
+      '<td style="text-align:right">'+p.qty.toLocaleString()+'</td>'+
+      '<td class="fw" style="text-align:right">C$ '+p.ventas.toLocaleString()+'</td>'+
+      '<td style="text-align:right">'+p.pct.toFixed(1)+'%'+
+        '<div style="height:4px;background:#e5e7eb;border-radius:2px;margin-top:3px">'+
+          '<div style="width:'+Math.min(p.pct*100/abcScaled[0].pct,100).toFixed(0)+'%;height:4px;background:'+(p.clase==='A'?'#1e40af':p.clase==='B'?'#d97706':'#dc2626')+';border-radius:2px"></div>'+
+        '</div></td>'+
+      '<td style="text-align:right;color:'+(p.margen>=30?'#16a34a':p.margen>=15?'#d97706':'#dc2626')+';font-weight:600">'+p.margen.toFixed(1)+'%</td>'+
+      '<td>'+desempLabel(p.margen)+'</td>'+
+    '</tr>';
+  });
+
+  // ── Mix de Ventas (Donut) ──
+  var mixColors = ['#1e40af','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#dbeafe','#eff6ff',
+                   '#f59e0b','#fbbf24','#fde68a','#fef3c7','#ea6c00'];
+  if (iMixChartObj) iMixChartObj.destroy();
+  iMixChartObj = new Chart(document.getElementById('iMixChart'),{
+    type:'doughnut',
+    data:{
+      labels: abcScaled.map(function(p){return p.nombre;}),
+      datasets:[{
+        data: abcScaled.map(function(p){return p.ventas;}),
+        backgroundColor: mixColors.slice(0, abcScaled.length),
+        borderWidth: 2, borderColor:'#fff', hoverOffset:6
+      }]
+    },
+    options:{
+      responsive:true,
+      cutout:'62%',
+      plugins:{
+        legend:{position:'right',labels:{font:{size:11},padding:8,usePointStyle:true}},
+        tooltip:{callbacks:{label:function(ctx){
+          var v=ctx.raw, pct=(v/grandTotal*100).toFixed(1);
+          return ' C$'+v.toLocaleString()+' ('+pct+'%)';
+        }}}
+      }
+    }
+  });
+
+  // ── Margen chart (horizontal bar, colored) ──
+  var pLabels = abcScaled.map(function(p){return p.nombre;});
+  var pMrg    = abcScaled.map(function(p){return parseFloat(p.margen.toFixed(1));});
+  if (iMargenChartObj) iMargenChartObj.destroy();
+  iMargenChartObj = new Chart(document.getElementById('iMargenChart'),{
+    type:'bar',
+    data:{
+      labels:pLabels,
+      datasets:[{
+        data:pMrg,
+        backgroundColor:pMrg.map(function(m){return m>=30?'#22c55e':m>=15?'#f59e0b':'#ef4444';}),
+        borderRadius:4, label:'Margen %'
+      }]
+    },
+    options:{
+      responsive:true, indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ' '+ctx.raw+'%';}}}},
+      scales:{x:{ticks:{callback:function(v){return v+'%';}},max:60,
+        grid:{color:'rgba(0,0,0,.05)'}}}
+    }
+  });
+
+  // ── Tendencia Bloque 6 vs 4 ──
+  if (iTendChartObj) iTendChartObj.destroy();
+  iTendChartObj = new Chart(document.getElementById('iTendChart'),{
+    type:'line',
+    data:{
+      labels: tendData.meses,
+      datasets:[
+        {label:'Bloque 6',data:tendData.b6,borderColor:'#1e40af',backgroundColor:'rgba(30,64,175,.08)',
+         borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#1e40af',tension:0.35,fill:true},
+        {label:'Bloque 4',data:tendData.b4,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',
+         borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#f59e0b',tension:0.35,fill:true}
+      ]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{position:'top',labels:{usePointStyle:true,font:{size:11}}}},
+      scales:{
+        y:{ticks:{callback:function(v){return 'C$'+(v/1000000).toFixed(1)+'M';}},
+           grid:{color:'rgba(0,0,0,.05)'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+
+  // ── Daños KPIs grid ──
+  var totalPerdB6  = danosData[0].perdida, totalDanB6 = danosData[0].danados;
+  var totalPerdB4  = danosData[1].perdida, totalDanB4 = danosData[1].danados;
+  var pctDanB6 = (danosData[0].danados / danosData[0].entradas * 100).toFixed(2);
+  var pctDanB4 = (danosData[1].danados / danosData[1].entradas * 100).toFixed(2);
+  var danosKpis = [
+    {label:'Uds Dañadas Total',  val:(totalDanB6+totalDanB4).toLocaleString()+' uds', color:'#dc2626'},
+    {label:'Pérdida Total',      val:'C$ '+totalPerd.toLocaleString(),                color:'#dc2626'},
+    {label:'% Daño Bloque 6',    val:pctDanB6+'%',                                   color:'#d97706'},
+    {label:'% Daño Bloque 4',    val:pctDanB4+'%',                                   color:'#d97706'}
+  ];
+  var dkEl = document.getElementById('iDanosKpis'); dkEl.innerHTML = '';
+  danosKpis.forEach(function(k){
+    dkEl.innerHTML += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;border-top:3px solid '+k.color+'">'+
+      '<div style="font-size:11px;color:#6b7280;margin-bottom:4px">'+k.label+'</div>'+
+      '<div style="font-size:18px;font-weight:700;color:'+k.color+'">'+k.val+'</div>'+
+    '</div>';
+  });
+
+  // ── Daños Table ──
+  var dtb = document.getElementById('iDanosTable'); dtb.innerHTML = '';
+  danosData.forEach(function(r){
+    var pctDan = (r.danados / r.entradas * 100).toFixed(2);
+    dtb.innerHTML += '<tr>'+
+      '<td>'+r.nombre+'</td>'+
+      '<td style="text-align:right">'+r.entradas.toLocaleString()+'</td>'+
+      '<td style="text-align:right;color:#ea6c00;font-weight:600">'+r.danados.toLocaleString()+'</td>'+
+      '<td style="text-align:right;color:'+(parseFloat(pctDan)>0.5?'#dc2626':'#d97706')+';font-weight:600">'+pctDan+'%</td>'+
+      '<td style="text-align:right">C$ '+r.pUnit.toFixed(2)+'</td>'+
+      '<td style="text-align:right;color:#dc2626;font-weight:700">C$ '+r.perdida.toLocaleString()+'</td>'+
+    '</tr>';
+  });
+  dtb.innerHTML += '<tr style="font-weight:700;border-top:2px solid #ccc;background:#fef2f2">'+
+    '<td>TOTAL</td>'+
+    '<td style="text-align:right">'+(danosData[0].entradas+danosData[1].entradas).toLocaleString()+'</td>'+
+    '<td style="text-align:right;color:#ea6c00">'+(totalDanB6+totalDanB4).toLocaleString()+'</td>'+
+    '<td style="text-align:right;color:#dc2626">'+((totalDanB6+totalDanB4)/(danosData[0].entradas+danosData[1].entradas)*100).toFixed(2)+'%</td>'+
+    '<td></td>'+
+    '<td style="text-align:right;color:#dc2626">C$ '+totalPerd.toLocaleString()+'</td>'+
+  '</tr>';
+}
+
+// ── ANÁLISIS SECTION ──
+var aEvolObj = null, aUNObj = null, aCajaObj = null, aMargenEvolObj = null;
+
+// Pérdidas dañados por mes (periodos con dato confirmado)
+var danosAcumData = [
+  {mes:'Nov 2025', perdida:20115},
+  {mes:'Dic 2025', perdida:17444},
+  {mes:'Ene 2026', perdida:25536},
+  {mes:'May 2026', perdida:8774}
+];
+
+function renderAnalisis() {
+  var from = document.getElementById('dateFrom').value;
+  var to   = document.getElementById('dateTo').value;
+  var fVentas=[], fCosto=[];
+  for (var i=0; i<allDailyDates.length; i++) {
+    var d=allDailyDates[i];
+    if ((!from||d>=from)&&(!to||d<=to)){fVentas.push(allDailyVentas[i]);fCosto.push(allDailyCosto[i]);}
+  }
+  var totalV = fVentas.reduce(function(s,v){return s+v;},0);
+  var totalC = fCosto.reduce(function(s,v){return s+v;},0);
+  var gastosMes = getGastosForMes(mesActivo);
+  var mesTotal  = totalVentasPorMes[mesActivo] || totalV || 1;
+  var scale     = mesTotal>0 ? totalV/mesTotal : 1;
+  var totalG    = gastosMes.reduce(function(s,g){return s+Math.round(g.monto*scale);},0);
+  var ub=totalV-totalC, un=ub-totalG;
+  var margenBruto = totalV>0 ? ub/totalV*100 : 0;
+  var pe = totalV>totalC ? Math.round(totalG/(1-totalC/totalV)) : 0;
+  var roi= (totalC+totalG)>0 ? (un/(totalC+totalG)*100).toFixed(1) : '0.0';
+
+  var mesIdx = {'2026-05':6,'2026-04':5,'2026-03':4,'2026-02':3,'2026-01':2,'2025-12':1,'2025-11':0};
+  var idx = mesIdx[mesActivo] !== undefined ? mesIdx[mesActivo] : 5;
+  var comprasMes = mensualCompras[idx] || 0;
+  var cajaEnt   = cajaData.entradas[idx] || 0;
+  var cajaSal   = cajaData.salidas[idx]  || 0;
+  var cajaNeto  = cajaData.neto[idx]     || 0;
+
+  // ── Concentración Bloque 6 ──
+  var prods = getProductosForMes(mesActivo);
+  var b6Prod = prods.find(function(p){return p.nombre.toLowerCase().indexOf('bloque 6')>=0;})||{ventas:0};
+  var concPct = totalV>0 ? (b6Prod.ventas*scale/totalV*100) : 0;
+
+  // ── Health Score (0–100): margen(40) + flujo(30) + crecimiento(30) ──
+  var scoreMargen = Math.min(margenBruto / 40 * 40, 40); // 40pts if margen >= 40%
+  var scoreFlujo  = cajaNeto > 0 ? 30 : cajaNeto > -100000 ? 15 : 0;
+  var prevIdx = idx > 0 ? idx-1 : 0;
+  var prevV = mensualVentas[prevIdx] || 1;
+  var growthPct = (mensualVentas[idx] - prevV) / prevV * 100;
+  var scoreCrecto = growthPct > 5 ? 30 : growthPct > 0 ? 20 : growthPct > -5 ? 10 : 0;
+  var healthScore = Math.round(scoreMargen + scoreFlujo + scoreCrecto);
+  var healthColor = healthScore >= 70 ? '#16a34a' : healthScore >= 45 ? '#d97706' : '#dc2626';
+  var healthLabel = healthScore >= 70 ? 'Saludable' : healthScore >= 45 ? 'Moderado' : 'En Riesgo';
+
+  // ── KPIs ──
+  document.getElementById('aKpiPE').textContent      = 'C$ '+pe.toLocaleString();
+  document.getElementById('aKpiROI').textContent     = roi+'%';
+  document.getElementById('aKpiROISub').textContent  = parseFloat(roi)>=0 ? '✓ Rentable este periodo' : '⚠ Pérdida neta';
+  document.getElementById('aKpiROISub').style.color  = parseFloat(roi)>=0 ? '#16a34a' : '#dc2626';
+  document.getElementById('aKpiCompras').textContent = 'C$ '+Math.round(comprasMes).toLocaleString();
+  document.getElementById('aKpiComprasSub').textContent = 'vs ventas: '+(totalV>0?(comprasMes/totalV*100).toFixed(1):'0')+'%';
+  document.getElementById('aKpiCxP').textContent     = 'C$ '+Math.round(totalCxP).toLocaleString();
+  document.getElementById('aKpiCxPSub').textContent  = 'créditos pendientes de cobro';
+  document.getElementById('aKpiConc').textContent    = concPct.toFixed(0)+'%';
+  document.getElementById('aKpiConc').style.color    = concPct >= 70 ? '#d97706' : '#1e40af';
+  document.getElementById('aKpiConcSub').textContent = concPct>=70 ? '⚠ Alta dependencia' : 'del total de ventas';
+  document.getElementById('aKpiHealth').textContent  = healthScore+'/100';
+  document.getElementById('aKpiHealth').style.color  = healthColor;
+  document.getElementById('aKpiHealthSub').textContent = healthLabel;
+
+  // ── Waterfall P&L ──
+  var wfSteps = [
+    {label:'Ventas',   val: totalV,        color:'#1e40af',  positive:true},
+    {label:'− Costo',  val:-totalC,        color:'#ef4444',  positive:false},
+    {label:'= UB',     val: ub,            color:'#3b82f6',  positive:ub>=0, subtotal:true},
+    {label:'− Gastos', val:-totalG,        color:'#ea6c00',  positive:false},
+    {label:'= U. Neta',val: un,            color:un>=0?'#16a34a':'#dc2626', positive:un>=0, subtotal:true},
+  ];
+  var wfEl = document.getElementById('aWaterfall'); wfEl.innerHTML = '';
+  var wfMax = totalV || 1;
+  wfSteps.forEach(function(s){
+    var pct = Math.abs(s.val)/wfMax*100;
+    wfEl.innerHTML +=
+      '<div style="display:flex;align-items:center;margin-bottom:6px;gap:8px">'+
+        '<div style="font-size:11px;color:#555;width:64px;text-align:right;flex-shrink:0">'+s.label+'</div>'+
+        '<div style="flex:1;background:#f3f4f6;border-radius:4px;height:'+(s.subtotal?'14':'10')+'px;overflow:hidden">'+
+          '<div style="width:'+pct.toFixed(1)+'%;height:100%;background:'+s.color+';border-radius:4px;'+
+            (s.subtotal?'opacity:.9':'opacity:.75')+'"></div>'+
+        '</div>'+
+        '<div style="font-size:11px;font-weight:'+(s.subtotal?'700':'500')+';color:'+s.color+';width:80px;text-align:right;flex-shrink:0">'+
+          'C$'+(Math.abs(s.val)/1000).toFixed(0)+'k'+
+        '</div>'+
+      '</div>';
+  });
+
+  // ── Hallazgos automáticos ──
+  var lider = prods.reduce(function(a,b){return a.ventas>b.ventas?a:b;},{ventas:0,nombre:'—'});
+  var topGasto = gastosMes.reduce(function(a,b){return b.monto>a.monto?b:a;},{cat:'—',monto:0});
+  var flujoPos = cajaNeto > 0;
+
+  document.getElementById('hallazgoProd').innerHTML =
+    '<b style="color:#1e3a8a;font-size:15px">'+lider.nombre+'</b><br>'+
+    'Ventas: <b>C$ '+Math.round(lider.ventas*scale).toLocaleString()+'</b><br>'+
+    'Representa el <b>'+(totalV>0?(lider.ventas*scale/totalV*100).toFixed(0):0)+'%</b> del total';
+
+  document.getElementById('hallazgoGasto').innerHTML =
+    '<b style="color:#ea6c00;font-size:15px">'+topGasto.cat+'</b><br>'+
+    'Monto: <b>C$ '+Math.round(topGasto.monto*scale).toLocaleString()+'</b><br>'+
+    'Del total gastos: <b>'+(totalG>0?(topGasto.monto*scale/totalG*100).toFixed(0):0)+'%</b>';
+
+  document.getElementById('hallazgoFlujo').innerHTML =
+    '<b style="color:'+(flujoPos?'#22c55e':'#e53935')+';font-size:15px">'+(flujoPos?'POSITIVO':'NEGATIVO')+'</b><br>'+
+    'Entradas: <b>C$ '+cajaEnt.toLocaleString()+'</b><br>'+
+    'Salidas: <b>C$ '+cajaSal.toLocaleString()+'</b><br>'+
+    'Neto: <b style="color:'+(cajaNeto>=0?'#16a34a':'#dc2626')+'">C$ '+cajaNeto.toLocaleString()+'</b>';
+
+  // ── Evolución mensual con forecast 3-mo moving avg ──
+  var forecastData = meses.map(function(_,i){
+    if (i < 2) return null;
+    return Math.round((mensualVentas[i]+mensualVentas[i-1]+mensualVentas[i-2])/3);
+  });
+  if (aEvolObj) aEvolObj.destroy();
+  aEvolObj = new Chart(document.getElementById('aEvolucionChart'),{
+    type:'line',
+    data:{labels:meses,datasets:[
+      {label:'Ventas',    data:mensualVentas,  borderColor:'#1e3a8a',backgroundColor:'rgba(30,58,138,.07)',fill:true, tension:.3,pointRadius:4,borderWidth:2.5},
+      {label:'Compras',   data:mensualCompras, borderColor:'#7c3aed',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:3,borderWidth:2,borderDash:[5,4]},
+      {label:'Costo Vta', data:mensualCosto,   borderColor:'#ef4444',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:3,borderWidth:1.5},
+      {label:'Gastos',    data:mensualGastos,  borderColor:'#ea6c00',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:3,borderWidth:1.5},
+      {label:'Prom. 3M',  data:forecastData,   borderColor:'#94a3b8',backgroundColor:'transparent',fill:false,tension:.3,pointRadius:2,borderWidth:1.5,borderDash:[2,2]},
+    ]},
+    options:{responsive:true,
+      plugins:{legend:{position:'top',labels:{boxWidth:10,padding:6,font:{size:10}}},
+        tooltip:{callbacks:{label:function(ctx){return ' '+ctx.dataset.label+': C$'+(ctx.raw||0).toLocaleString();}}}},
+      scales:{y:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(0,0,0,.04)'}},
+              x:{grid:{display:false}}}}
+  });
+
+  // ── Margen bruto % evolution ──
+  var mensualMrg = mensualVentas.map(function(v,i){return v>0?parseFloat(((v-mensualCosto[i])/v*100).toFixed(1)):null;});
+  if (aMargenEvolObj) aMargenEvolObj.destroy();
+  aMargenEvolObj = new Chart(document.getElementById('aMargenEvolChart'),{
+    type:'line',
+    data:{labels:meses,datasets:[
+      {label:'Margen Bruto %',data:mensualMrg,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',
+       fill:true,tension:.35,pointRadius:5,pointBackgroundColor:mensualMrg.map(function(m){return m>=35?'#16a34a':m>=25?'#d97706':'#dc2626';}),
+       borderWidth:2.5}
+    ]},
+    options:{responsive:true,
+      plugins:{legend:{display:false},
+        annotation:{annotations:{line1:{type:'line',yMin:35,yMax:35,borderColor:'rgba(16,163,74,.4)',borderWidth:1.5,borderDash:[4,3],
+          label:{content:'Meta 35%',enabled:true,position:'end',font:{size:10},color:'#16a34a'}}}}},
+      scales:{y:{min:25,ticks:{callback:function(v){return v+'%';}},grid:{color:'rgba(0,0,0,.04)'}},
+              x:{grid:{display:false}}}}
+  });
+
+  // ── Utilidad Neta con línea de tendencia ──
+  var mensualUNCalc = mensualVentas.map(function(v,i){return v-mensualCosto[i]-mensualGastos[i];});
+  var unTrend = mensualUNCalc.map(function(_,i){
+    if(i<1) return null;
+    return Math.round((mensualUNCalc[i]+mensualUNCalc[i-1])/2);
+  });
+  if (aUNObj) aUNObj.destroy();
+  aUNObj = new Chart(document.getElementById('aUNChart'),{
+    type:'bar',
+    data:{labels:meses,datasets:[
+      {type:'bar',  label:'Utilidad Neta', data:mensualUNCalc, backgroundColor:mensualUNCalc.map(function(v){return v>=0?'rgba(34,197,94,.7)':'rgba(239,68,68,.7)';}),borderRadius:4},
+      {type:'line', label:'Tendencia 2M',  data:unTrend,       borderColor:'#1e40af',backgroundColor:'transparent',pointRadius:3,borderWidth:2,tension:.3,borderDash:[4,3]}
+    ]},
+    options:{responsive:true,
+      plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}}},
+      scales:{y:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(0,0,0,.04)'}},
+              x:{grid:{display:false}}}}
+  });
+
+  // ── Flujo de caja ──
+  if (aCajaObj) aCajaObj.destroy();
+  aCajaObj = new Chart(document.getElementById('aCajaChart'),{
+    type:'bar',
+    data:{labels:meses,datasets:[
+      {label:'Entradas',data:cajaData.entradas,backgroundColor:'rgba(34,197,94,.7)',borderRadius:4},
+      {label:'Salidas', data:cajaData.salidas, backgroundColor:'rgba(239,68,68,.7)', borderRadius:4},
+      {label:'Neto',    data:cajaData.neto,    type:'line',borderColor:'#1e40af',backgroundColor:'transparent',
+       pointRadius:3,borderWidth:2,tension:.3,borderDash:[3,2]}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:10}}}},
+      scales:{y:{ticks:{callback:function(v){return 'C$'+(v/1000).toFixed(0)+'k';}},grid:{color:'rgba(0,0,0,.04)'}},
+              x:{grid:{display:false}}}}
+  });
+
+  // ── CxP table ──
+  var cxpTb = document.getElementById('aCxPTable'); cxpTb.innerHTML = '';
+  var cxpShow = [
+    {ref:'Crédito #1',   fVenta:'2026-05-21',totalVenta:13585, saldo:200,   estado:'Parcial'},
+    {ref:'Crédito #2',   fVenta:'2026-05-20',totalVenta:5720,  saldo:0,     estado:'Saldado'},
+    {ref:'Crédito #3',   fVenta:'2026-05-21',totalVenta:11750, saldo:0,     estado:'Saldado'},
+    {ref:'Cartera total',fVenta:'—',          totalVenta:0,     saldo:929476,estado:'Pendiente'},
+  ];
+  cxpShow.forEach(function(c){
+    var badge = c.estado==='Saldado'?'✓':c.estado==='Pendiente'?'⚠':'◷';
+    var badgeStyle = c.estado==='Saldado'?'color:#16a34a':c.estado==='Pendiente'?'color:#dc2626;font-weight:700':'color:#d97706';
+    cxpTb.innerHTML += '<tr>'+
+      '<td class="fw">'+c.ref+'</td>'+
+      '<td>'+c.fVenta+'</td>'+
+      '<td>'+(c.totalVenta>0?'C$ '+c.totalVenta.toLocaleString():'—')+'</td>'+
+      '<td class="fw" style="'+(c.saldo>0?'color:#dc2626':'color:#16a34a')+'">C$ '+c.saldo.toLocaleString()+'</td>'+
+      '<td><span style="'+badgeStyle+'">'+badge+' '+c.estado+'</span></td>'+
+    '</tr>';
+  });
+
+  // ── Pérdidas dañados ──
+  var danosEl = document.getElementById('aDanosAcum'); danosEl.innerHTML = '';
+  var totalDanAcum = danosAcumData.reduce(function(s,d){return s+d.perdida;},0);
+  var totalVentasAcum = mensualVentas.reduce(function(s,v){return s+v;},0);
+  danosEl.innerHTML += '<div style="display:grid;grid-template-columns:repeat('+danosAcumData.length+',1fr);gap:10px;margin-bottom:10px">';
+  danosAcumData.forEach(function(d){
+    danosEl.innerHTML += '<div style="text-align:center;padding:8px;background:#fff5f5;border-radius:8px;border:1px solid #fecaca">'+
+      '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px">'+d.mes+'</div>'+
+      '<div style="font-size:17px;font-weight:800;color:#e53935">C$'+d.perdida.toLocaleString()+'</div>'+
+    '</div>';
+  });
+  danosEl.innerHTML += '</div>';
+  danosEl.innerHTML +=
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#fee2e2;border-radius:8px">'+
+      '<span style="font-weight:700;color:#991b1b">Total acumulado (meses con dato):</span>'+
+      '<span style="font-size:18px;font-weight:800;color:#e53935">C$ '+totalDanAcum.toLocaleString()+'</span>'+
+      '<span style="font-size:11px;color:#888">≈ '+(totalVentasAcum>0?(totalDanAcum/totalVentasAcum*100).toFixed(2):'—')+'% de ventas totales</span>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#666;margin-top:6px">⚠ Bloques de 2ª calidad (costo C$13.69–C$16.00/ud). 1,474 uds dadas de baja en periodos documentados.</div>';
+
+  // ── Resumen mensual con Δ MoM ──
+  var tb=document.getElementById('aMonthTable'); tb.innerHTML='';
+  var mensualUNFull = mensualVentas.map(function(v,i){return v-mensualCosto[i]-mensualGastos[i];});
+  meses.forEach(function(m,i){
+    var v=mensualVentas[i],c=mensualCosto[i],g=mensualGastos[i],comp=mensualCompras[i];
+    var ubm=v-c, unm=mensualUNFull[i], mrg=v>0?(ubm/v*100).toFixed(1):'—';
+    var flujo=cajaData.neto[i]||0;
+    var gFlag = g===0 ? '<span style="color:#aaa;font-size:10px">sin dato</span>' : g.toLocaleString();
+
+    var deltaV='—', deltaUN='—';
+    if(i>0 && mensualVentas[i-1]>0){
+      var dv=((v-mensualVentas[i-1])/mensualVentas[i-1]*100).toFixed(1);
+      deltaV='<span style="color:'+(parseFloat(dv)>=0?'#16a34a':'#dc2626')+'">'+(parseFloat(dv)>=0?'↑':'↓')+Math.abs(dv)+'%</span>';
+      var du=((unm-mensualUNFull[i-1])/(Math.abs(mensualUNFull[i-1])||1)*100).toFixed(1);
+      deltaUN='<span style="color:'+(parseFloat(du)>=0?'#16a34a':'#dc2626')+'">'+(parseFloat(du)>=0?'↑':'↓')+Math.abs(du)+'%</span>';
+    }
+
+    var mesKey=({'Nov 2025':'2025-11','Dic 2025':'2025-12','Ene 2026':'2026-01','Feb 2026':'2026-02','Mar 2026':'2026-03','Abr 2026':'2026-04','May 2026':'2026-05'})[m];
+    var isActive=mesKey===mesActivo;
+    tb.innerHTML+='<tr style="'+(isActive?'background:#e8f0fe;font-weight:700':'')+'">'+
+      '<td>'+m+(isActive?' <span style="background:#1e40af;color:#fff;font-size:9px;padding:1px 5px;border-radius:3px">activo</span>':'')+'</td>'+
+      '<td class="fw">'+v.toLocaleString()+'</td>'+
+      '<td>'+deltaV+'</td>'+
+      '<td class="'+(comp>v?'dn':'')+'">'+comp.toLocaleString()+'</td>'+
+      '<td>'+c.toLocaleString()+'</td>'+
+      '<td>'+gFlag+'</td>'+
+      '<td class="'+(unm>=0?'up fw':'dn fw')+'">'+unm.toLocaleString()+'</td>'+
+      '<td>'+deltaUN+'</td>'+
+      '<td>'+(mrg!=='—'?mrg+'%':mrg)+'</td>'+
+      '<td class="'+(flujo>=0?'up':'dn')+'">'+flujo.toLocaleString()+'</td>'+
+    '</tr>';
+  });
+}
+
+// ── Sidebar filter selects ──
+document.querySelectorAll('.filter-group select').forEach(function(sel){
+  sel.addEventListener('change', function(){
+    // Sync year/mes to date pickers
+    var yearEl = document.querySelectorAll('.filter-group select')[0];
+    var mesEl  = document.querySelectorAll('.filter-group select')[1];
+    var mesMap = {
+      'Mayo':'05','Abril':'04','Marzo':'03','Febrero':'02',
+      'Enero':'01','Diciembre':'12','Noviembre':'11'
+    };
+    var yr = yearEl.value;
+    var mn = mesMap[mesEl.value] || '04';
+    // Days in month
+    var days = new Date(parseInt(yr), parseInt(mn), 0).getDate();
+    document.getElementById('dateFrom').value = yr+'-'+mn+'-01';
+    document.getElementById('dateTo').value   = yr+'-'+mn+'-'+String(days).padStart(2,'0');
+    applyFilters();
+  });
+});
+
+// ── Initial render ──
+applyFilters();
+
+// ══ PRO ENHANCEMENTS ══
+
+// ── 1. SPARKLINES en KPIs ──
+var spkVentasChart = null, spkUBChart = null, spkUNChart = null;
+var mensualUN = mensualVentas.map(function(v,i){return v - mensualCosto[i] - mensualGastos[i];});
+
+function makeSparkline(canvasId, data, color) {
+  var el = document.getElementById(canvasId);
+  if (!el) return null;
+  var existing = Chart.getChart(el);
+  if (existing) existing.destroy();
+  return new Chart(el, {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: [{
+        data: data,
+        borderColor: color,
+        backgroundColor: color.replace(')', ',.15)').replace('rgb', 'rgba'),
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false } }
+    }
+  });
+}
+
+spkVentasChart = makeSparkline('spkVentas', mensualVentas, '#1e3a8a');
+spkUBChart     = makeSparkline('spkUB',     mensualUB,     'rgb(30,180,100)');
+spkUNChart     = makeSparkline('spkUN',     mensualUN,     'rgb(0,137,123)');
+
+// ── 2. SUBTITLE DINÁMICO en chart principal ──
+var _origApplyFilters = applyFilters;
+// Patch applyFilters to update subtitle
+var _applyPatched = false;
+function patchApplyFilters() {
+  if (_applyPatched) return; _applyPatched = true;
+  var origBtn = document.getElementById('btnApply');
+  var origReset = document.getElementById('btnReset');
+  function updateSub() {
+    var from = document.getElementById('dateFrom').value;
+    var to   = document.getElementById('dateTo').value;
+    var sub  = document.getElementById('lineChartSub');
+    if (!sub) return;
+    var prod = document.getElementById('filterProd');
+    var prodVal = prod && prod.value ? prod.options[prod.selectedIndex].text : 'Todos los productos';
+    var fromFmt = from ? from.split('-').reverse().join('/') : '';
+    var toFmt   = to   ? to.split('-').reverse().join('/')   : '';
+    var periodoStr = (from === to || !to) ? fromFmt : (fromFmt + ' — ' + toFmt);
+    sub.textContent = periodoStr + '  |  ' + prodVal;
+  }
+  document.getElementById('btnApply').addEventListener('click', updateSub);
+  document.getElementById('btnReset').addEventListener('click', function(){ setTimeout(updateSub, 50); });
+  document.getElementById('dateFrom').addEventListener('change', updateSub);
+  document.getElementById('dateTo').addEventListener('change', updateSub);
+  updateSub();
+}
+patchApplyFilters();
+
+// ── 3. PROGRESS BARS mejoradas en tabla de productos ──
+// Override renderProductTable para usar las nuevas clases
+var _origRenderProductTable = renderProductTable;
+renderProductTable = function(filtV, filtC) {
+  var prods = getProductosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || filtV || 1;
+  var scale = mesTotal > 0 ? filtV / mesTotal : 1;
+  var ptBody = document.getElementById('productTable');
+  ptBody.innerHTML = '';
+  var ptTotal = {v:0,c:0}, ptTotalQty = 0;
+  prods.forEach(function(p){
+    var sv = Math.round(p.ventas * scale);
+    var sc = Math.round(p.costo * scale);
+    var sq = Math.round((p.qty || 0) * scale);
+    var ub = sv - sc;
+    var m  = sv > 0 ? (ub/sv*100).toFixed(1) : '0.0';
+    var mNum = parseFloat(m);
+    var barColor = mNum >= 30 ? '#22c55e' : mNum >= 15 ? '#f59e0b' : '#ef4444';
+    var barW = Math.min(Math.max(mNum, 0), 100);
+    ptTotal.v += sv; ptTotal.c += sc; ptTotalQty += sq;
+    ptBody.innerHTML += '<tr>' +
+      '<td>' + p.nombre + '</td>' +
+      '<td class="fw" style="text-align:right">' + sq.toLocaleString() + '</td>' +
+      '<td class="fw">' + sv.toLocaleString() + '</td>' +
+      '<td>' + sc.toLocaleString() + '</td>' +
+      '<td class="fw up">' + ub.toLocaleString() + '</td>' +
+      '<td>' +
+        '<div class="prod-margin-wrap">' +
+          '<div class="prod-margin-bar" style="width:' + Math.round(barW * 0.7) + 'px;background:' + barColor + '"></div>' +
+          '<span class="prod-margin-label" style="color:' + barColor + '">' + m + '%</span>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+  var tubTotal = ptTotal.v - ptTotal.c;
+  var tmTotal  = ptTotal.v > 0 ? (tubTotal/ptTotal.v*100).toFixed(1) : '0.0';
+  ptBody.innerHTML += '<tr style="border-top:2px solid #cdd5e0;font-weight:700">' +
+    '<td class="fw">Total</td>' +
+    '<td class="fw" style="text-align:right">' + ptTotalQty.toLocaleString() + '</td>' +
+    '<td class="fw">' + ptTotal.v.toLocaleString() + '</td>' +
+    '<td class="fw">' + ptTotal.c.toLocaleString() + '</td>' +
+    '<td class="fw up">' + tubTotal.toLocaleString() + '</td>' +
+    '<td class="fw">' + tmTotal + '%</td>' +
+  '</tr>';
+};
+// Re-render after override
+applyFilters();
+
+// ── 4. SIDEBAR DRAWER colapsable ──
+(function() {
+  // Crear drawer HTML dinámicamente
+  var overlay = document.createElement('div');
+  overlay.className = 'sidebar-drawer-overlay';
+  overlay.id = 'sidebarOverlay';
+  document.body.appendChild(overlay);
+
+  var drawer = document.createElement('div');
+  drawer.className = 'sidebar-drawer';
+  drawer.id = 'sidebarDrawer';
+  drawer.innerHTML = [
+    '<button class="sidebar-drawer-close" id="btnCloseSidebar">&#10005;</button>',
+    '<h2>&#9881; Filtros Rápidos</h2>',
+    '<div class="filter-group"><label>Año</label>',
+    '<select id="dYear"><option>2026</option><option>2025</option></select></div>',
+    '<div class="filter-group"><label>Mes</label>',
+    '<select id="dMes">',
+    '<option>Mayo</option><option selected>Abril</option><option>Marzo</option>',
+    '<option>Febrero</option><option>Enero</option><option>Diciembre</option><option>Noviembre</option>',
+    '</select></div>',
+    '<div class="filter-group"><label>Producto</label>',
+    '<select id="dProd"><option value="">Todos</option><option>Bloque 6</option><option>Bloque 4</option><option>Cemento</option><option>Transporte</option></select></div>',
+    '<div style="background:#f0f4ff;border-radius:8px;padding:10px;font-size:11px;color:#334;margin-top:4px">',
+    '&#128197; <strong>Última actualización</strong><br>02/05/2026 12:27 AM',
+    '</div>',
+    '<div style="background:#f8f9fc;border-radius:8px;padding:10px;font-size:10px;color:#556;line-height:1.6">',
+    'Los datos se actualizan al cambiar los filtros.',
+    '</div>',
+    '<button class="btn-primary" id="btnApplyDrawer" style="width:100%;justify-content:center;margin-top:4px">&#128269; Aplicar</button>'
+  ].join('');
+  document.body.appendChild(drawer);
+
+  function openDrawer() { drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+
+  document.getElementById('btnToggleSidebar').addEventListener('click', openDrawer);
+  document.getElementById('btnCloseSidebar').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  var mesMap = {
+    'Mayo':'05','Abril':'04','Marzo':'03','Febrero':'02',
+    'Enero':'01','Diciembre':'12','Noviembre':'11'
+  };
+
+  document.getElementById('btnApplyDrawer').addEventListener('click', function(){
+    var yr = document.getElementById('dYear').value;
+    var mn = mesMap[document.getElementById('dMes').value] || '04';
+    var days = new Date(parseInt(yr), parseInt(mn), 0).getDate();
+    document.getElementById('dateFrom').value = yr+'-'+mn+'-01';
+    document.getElementById('dateTo').value   = yr+'-'+mn+'-'+String(days).padStart(2,'0');
+    applyFilters();
+    closeDrawer();
+  });
+})();
+</script>
+</body>
+</html>

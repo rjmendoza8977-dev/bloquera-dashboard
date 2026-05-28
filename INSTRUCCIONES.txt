@@ -1,0 +1,77 @@
+╔══════════════════════════════════════════════════════════════╗
+║       Bloquera Fúnez — Dashboard Financiero                  ║
+║       Guía de uso                                            ║
+╚══════════════════════════════════════════════════════════════╝
+
+📁 CONTENIDO DE LA CARPETA
+─────────────────────────────────────────────────────────────
+  datos/                     ← Aquí pones el respaldo de Akasia
+  actualizar.py              ← Script que lee el .aks y actualiza el dashboard
+  bloquera-funez-template.html ← Plantilla del dashboard (no borrar)
+  bloquera-funez.html        ← Dashboard generado (se sobreescribe cada vez)
+  gastos.json                ← Gastos operativos por mes (editar manualmente)
+  INSTRUCCIONES.txt          ← Este archivo
+
+
+🔄 CÓMO ACTUALIZAR EL DASHBOARD
+─────────────────────────────────────────────────────────────
+  1. Abre Akasia
+  2. Ve a: Configuración → Respaldo / Backup
+  3. Descarga el archivo .aks
+  4. PEGA el archivo .aks en la carpeta  datos/
+     (puedes tener varios, el script usa el más reciente)
+  5. Doble clic en: actualizar.py
+  6. El dashboard se abre automáticamente en el navegador ✅
+
+
+⚙️  REQUISITOS
+─────────────────────────────────────────────────────────────
+  • Python 3.8 o superior (sin librerías externas)
+  • Verificar Python: abre CMD y escribe:  python --version
+  • Descargar Python gratis: https://www.python.org/downloads/
+
+
+📝 GASTOS OPERATIVOS (gastos.json)
+─────────────────────────────────────────────────────────────
+  Los gastos (administrativos, combustible, etc.) no están en
+  el respaldo de Akasia. Los puedes editar manualmente en el
+  archivo gastos.json con cualquier editor de texto (Notepad).
+
+  Formato:
+  {
+    "2026-05": [
+      {"cat": "Gasto Administrativo", "monto": 258200},
+      {"cat": "Combustible",          "monto": 5500}
+    ]
+  }
+
+  IMPORTANTE: El mes va en formato  YYYY-MM  (ej: "2026-05")
+
+
+💻 USAR EN OTRA PC
+─────────────────────────────────────────────────────────────
+  Opción A — Solo el HTML (sin actualizar):
+    Copia el archivo  bloquera-funez.html  a la otra PC.
+    Doble clic → se abre en el navegador. ¡Listo!
+
+  Opción B — Con capacidad de actualizar:
+    Copia TODA la carpeta bloquera-dashboard/ a la otra PC.
+    Instala Python en esa PC.
+    Sigue los pasos de "Cómo actualizar" arriba.
+
+
+❓ PROBLEMAS FRECUENTES
+─────────────────────────────────────────────────────────────
+  • "No se encontró ningún archivo .aks"
+    → Verifica que el archivo esté en la subcarpeta  datos/
+
+  • "Python no está instalado"
+    → Descarga e instala Python desde python.org
+    → Al instalar, marca la casilla "Add Python to PATH"
+
+  • El dashboard abre pero los datos no cambian
+    → Asegúrate de que el .aks nuevo esté en datos/
+    → Borra el .aks viejo si hay más de uno
+
+
+📞 Generado con Wibey CLI — Mayo 2026

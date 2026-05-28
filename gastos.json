@@ -1,0 +1,24 @@
+{
+  "2026-04": [
+    {"cat": "Gasto Administrativo", "monto": 412177},
+    {"cat": "Gasto por Inversión",  "monto": 120310},
+    {"cat": "Combustible",          "monto": 17950},
+    {"cat": "Viáticos",             "monto": 538}
+  ],
+  "2026-05": [
+    {"cat": "Gasto Administrativo", "monto": 258200},
+    {"cat": "Viáticos",             "monto": 180}
+  ],
+  "2026-03": [
+    {"cat": "Gasto Administrativo", "monto": 450000},
+    {"cat": "Gasto por Inversión",  "monto": 75370}
+  ],
+  "2025-12": [
+    {"cat": "Gasto Administrativo", "monto": 1450000},
+    {"cat": "Gasto por Inversión",  "monto": 63742}
+  ],
+  "2025-11": [
+    {"cat": "Gasto Administrativo", "monto": 1482746},
+    {"cat": "Gasto por Inversión",  "monto": 63742}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Bloquera Fúnez — Dashboard",
+  "short_name": "Bloquera",
+  "description": "Dashboard financiero Bloquera Fúnez",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1a1a3e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231a1a3e' rx='24'/><text y='140' x='20' font-size='130'>🧱</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

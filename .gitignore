@@ -1,0 +1,5 @@
+datos/
+*.aks
+__pycache__/
+*.pyc
+.DS_Store

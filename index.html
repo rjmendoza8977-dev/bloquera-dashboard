@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Bloquera Fúnez — Dashboard Financiero</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧱</text></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bloquera">
+<meta name="theme-color" content="#1a1a3e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1a1a2e;font-size:13px}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:linear-gradient(90deg,#1a1a3e 0%,#1e2a5e 100%);
+  display:flex;align-items:center;padding:0 24px;height:64px;gap:0;
+}
+.brand{display:flex;align-items:center;gap:12px;margin-right:32px}
+.brand-icon{font-size:32px}
+.brand-text h1{color:#fff;font-size:20px;font-weight:800;line-height:1.1}
+.brand-text p{color:#8899cc;font-size:11px}
+.nav{display:flex;gap:4px;flex:1}
+.nav-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:6px;border:none;
+  font-size:13px;font-weight:500;cursor:pointer;
+  color:#aabbdd;background:transparent;transition:all .15s;
+}
+.nav-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-btn.active{background:#fff;color:#1a1a3e;font-weight:700}
+.powerbi{display:flex;align-items:center;gap:6px;color:#f2c811;font-size:13px;font-weight:700;margin-left:auto}
+.pbi-icon{width:24px;height:24px}
+
+/* ── FILTER BAR ── */
+.filterbar{
+  background:#fff;border-bottom:1px solid #dde2ee;
+  display:flex;align-items:center;justify-content:flex-end;
+  gap:12px;padding:10px 24px;
+}
+.date-input{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid #cdd5e0;border-radius:6px;padding:5px 10px;
+  font-size:12px;color:#334;background:#fff;cursor:pointer;
+}
+.select-filter{
+  border:1px solid #cdd5e0;border-radius:6px;padding:5px 28px 5px 10px;
+  font-size:12px;color:#334;background:#fff;cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23667'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;min-width:160px;
+}
+
+/* ── MAIN GRID ── */
+.content{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
+
+/* ── KPI ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{
+  background:#fff;border-radius:10px;padding:14px 16px;
+  border:1px solid #e0e5ef;position:relative;overflow:hidden;
+}
+.kpi.highlighted{background:#1e3a6e;border-color:#1e3a6e}
+.kpi-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.kpi.blue   .kpi-label{color:#0066cc}
+.kpi.green  .kpi-label{color:#00aa55}
+.kpi.purple .kpi-label{color:#7c3aed}
+.kpi.orange .kpi-label{color:#ea6c00}
+.kpi.teal   .kpi-label{color:#00897b}
+.kpi.highlighted .kpi-label{color:#7ca8ff}
+.kpi-body{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.kpi-icon-wrap{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.kpi.blue   .kpi-icon-wrap{background:#e6f0ff}
+.kpi.green  .kpi-icon-wrap{background:#e6f9f0}
+.kpi.purple .kpi-icon-wrap{background:#f3e8ff}
+.kpi.orange .kpi-icon-wrap{background:#fff3e0}
+.kpi.teal   .kpi-icon-wrap{background:#e0f5f3}
+.kpi.highlighted .kpi-icon-wrap{background:rgba(255,255,255,.15)}
+.kpi-value{font-size:19px;font-weight:800;line-height:1;color:#1a1a2e}
+.kpi.highlighted .kpi-value{color:#fff;font-size:22px}
+.kpi.highlighted.pct .kpi-value{font-size:28px}
+.kpi-trend{font-size:11px;color:#666}
+.kpi-trend .up{color:#00aa55;font-weight:700}
+.kpi-trend .dn{color:#e53935;font-weight:700}
+.kpi-pct{
+  margin-left:auto;align-self:flex-start;
+  font-size:11px;font-weight:800;padding:2px 7px;border-radius:12px;
+  background:#e8f0fe;color:#1565c0;white-space:nowrap;
+}
+.kpi-pct-neg{background:#fce4ec;color:#c62828}
+.kpi-pct-warn{background:#fff3e0;color:#e65100}
+.kpi-pct-ok{background:#e8f5e9;color:#2e7d32}
+.kpi-pct-light{background:rgba(255,255,255,.25);color:#fff}
+
+/* ── MIDDLE ROW ── */
+.mid-row{display:grid;grid-template-columns:2fr 1.4fr 1fr auto;gap:12px;align-items:start}
+/* ── BOTTOM ROW ── */
+.bot-row{display:grid;grid-template-columns:1.3fr 1.2fr 1fr;gap:12px;align-items:start}
+/* ── METRICS ROW ── */
+.metrics-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+
+.card{background:#fff;border-radius:10px;border:1px solid #e0e5ef;padding:16px;overflow:hidden}
+.card-title{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:14px}
+
+/* sidebar */
+.sidebar-panel{
+  background:#fff;border-radius:10px;border:1px solid #e0e5ef;
+  padding:16px;display:flex;flex-direction:column;gap:12px;min-width:160px;
+}
+/* Drawer sidebar */
+.sidebar-drawer {
+  position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
+  background: #fff; border-left: 1px solid #dde2ee;
+  box-shadow: -4px 0 24px rgba(0,0,0,.12);
+  z-index: 1000; transition: right .25s ease;
+  display: flex; flex-direction: column; gap: 16px;
+  padding: 24px 20px; overflow-y: auto;
+}
+.sidebar-drawer.open { right: 0; }
+.sidebar-drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.25);
+  z-index: 999; display: none;
+}
+.sidebar-drawer-overlay.open { display: block; }
+.sidebar-drawer-close {
+  position: absolute; top: 14px; right: 14px;
+  background: #f0f2f5; border: none; border-radius: 6px;
+  width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.sidebar-drawer-close:hover { background: #dde2ee; }
+.sidebar-drawer h2 {
+  font-size: 14px; font-weight: 800; color: #1a1a2e;
+  border-bottom: 1px solid #e0e5ef; padding-bottom: 12px; margin-bottom: 4px;
+}
+.filter-group label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:4px}
+.filter-group select{width:100%;border:1px solid #cdd5e0;border-radius:5px;padding:5px 8px;font-size:12px;color:#334;background:#f8f9fc;}
+.last-update{background:#f0f4ff;border-radius:6px;padding:8px;font-size:10px;display:flex;align-items:flex-start;gap:6px;color:#334;}
+.notes-box{background:#f8f9fc;border-radius:6px;padding:8px;font-size:10px;color:#556;line-height:1.5}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse}
+thead th{
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  color:#667;padding:6px 8px;border-bottom:2px solid #e0e5ef;text-align:left;
+}
+tbody td{padding:7px 8px;font-size:12px;border-bottom:1px solid #f0f2f8}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#f7f9ff}
+.fw{font-weight:700}
+.up{color:#00aa55}.dn{color:#e53935}
+.row-util td{background:#e8f4ec;font-weight:700}
+.row-op td{background:#fdf3e7;font-weight:700}
+.row-net td{background:#1e3a6e;color:#fff;font-weight:700}
+.row-net td .up{color:#7dffb3}
+.margin-bar{display:inline-block;height:10px;border-radius:3px;background:#00aa55;}
+.margin-bar.low{background:#f59e0b}
+.margin-bar.neg{background:#ef4444}
+
+/* ── METRIC CARDS ── */
+.metric-card{
+  background:#fff;border-radius:10px;border:1px solid #e0e5ef;
+  padding:16px;display:flex;align-items:center;gap:12px;
+}
+.metric-icon{font-size:26px}
+.metric-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.metric-card.blue  .metric-label{color:#0066cc}
+.metric-card.green .metric-label{color:#00aa55}
+.metric-card.teal  .metric-label{color:#00897b}
+.metric-card.orange .metric-label{color:#ea6c00}
+.metric-card.purple .metric-label{color:#7c3aed}
+.metric-value{font-size:16px;font-weight:800;color:#1a1a2e}
+.metric-sub{font-size:10px;color:#888;margin-top:3px;line-height:1.4}
+
+/* ── PRO: HOVER STATES ── */
+.kpi {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.kpi:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(30,58,138,.10);
+  border-color: #b8c5e0;
+}
+.kpi.highlighted:hover {
+  box-shadow: 0 6px 24px rgba(30,42,94,.25);
+}
+.card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.07);
+}
+.metric-card {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+
+/* ── PRO: RESPONSIVE KPI GRID ── */
+@media (max-width:1400px) {
+  .kpi-row[style*="repeat(7"] { grid-template-columns: repeat(4,1fr) !important; }
+}
+@media (max-width:900px) {
+  .kpi-row { grid-template-columns: repeat(2,1fr) !important; }
+  .mid-row, .bot-row { grid-template-columns: 1fr !important; }
+  .metrics-row { grid-template-columns: repeat(2,1fr) !important; }
+  .sidebar-panel { min-width: unset; }
+}
+
+/* ── PRO: SPARKLINE WRAPPERS ── */
+.kpi-sparkline-wrap {
+  width: 100%; height: 32px; margin-top: 6px; position: relative;
+}
+.kpi-sparkline-wrap canvas {
+  width: 100% !important; height: 32px !important;
+}
+
+/* ── PRO: ESTADO RESULTADOS MEJORADO ── */
+.er-subtotal td {
+  background: transparent !important;
+  border-top: 2px solid #e0e5ef;
+  border-bottom: 2px solid #e0e5ef;
+}
+.er-subtotal td:first-child {
+  border-left: 4px solid #1e3a8a;
+  padding-left: 10px;
+}
+.er-net td {
+  background: #f0f4ff !important;
+  color: #1a1a2e !important;
+  font-weight: 700;
+}
+.er-net td:first-child {
+  border-left: 4px solid #1e3a8a;
+  padding-left: 10px;
+  color: #1e3a8a !important;
+}
+.er-net td .up { color: #00aa55 !important; }
+.er-net td .dn { color: #e53935 !important; }
+.row-util td { background: #eef6f0 !important; }
+.row-util td:first-child { border-left: 4px solid #00aa55; padding-left: 10px; }
+.row-op td { background: #fdf6ec !important; }
+.row-op td:first-child { border-left: 4px solid #ea6c00; padding-left: 10px; }
+.row-net td { background: #f0f4ff !important; color: #1a1a2e !important; }
+.row-net td:first-child { border-left: 4px solid #1e3a8a; padding-left: 10px; color: #1e3a8a !important; }
+
+/* ── PRO: BUTTONS ── */
+.btn-primary {
+  background: #1e3a8a; color: #fff; border: none; border-radius: 7px;
+  padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: background .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-primary:hover { background: #1e4db0; transform: translateY(-1px); }
+.btn-secondary {
+  background: #eef1f8; color: #334; border: 1px solid #cdd5e0; border-radius: 7px;
+  padding: 7px 14px; font-size: 12px; cursor: pointer;
+  font-family: inherit; transition: background .15s;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-secondary:hover { background: #dde3f0; }
+
+/* ── PRO: CHART SUBTITLE ── */
+.chart-subtitle {
+  font-size: 10px; color: #888; font-weight: 500; margin-top: -10px; margin-bottom: 10px;
+}
+
+/* ── PRO: PROGRESS BAR EN TABLA PRODUCTOS ── */
+.prod-margin-wrap {
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.prod-margin-bar {
+  height: 8px; border-radius: 4px; flex-shrink: 0; transition: width .4s ease;
+}
+.prod-margin-label { font-size: 11px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">&#129529;</div>
+    <div class="brand-text">
+      <h1>Bloquera Fúnez</h1>
+      <p>Dashboard Financiero</p>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active">&#128202; Resumen</button>
+    <button class="nav-btn">&#128722; Ventas</button>
+    <button class="nav-btn">&#128203; Gastos</button>
+    <button class="nav-btn">&#127959; Inventario</button>
+    <button class="nav-btn">&#9881; Producción</button>
+    <button class="nav-btn">&#128200; Análisis</button>
+  </nav>
+  <button id="btnToggleSidebar" class="btn-secondary" style="margin-left:8px;padding:6px 12px;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.8)" title="Filtros rápidos">&#9776; Filtros</button>
+  <div class="powerbi">
+    <svg class="pbi-icon" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="10" width="4" height="12" rx="1" fill="#f2c811"/>
+      <rect x="8" y="6" width="4" height="16" rx="1" fill="#f2c811"/>
+      <rect x="14" y="2" width="4" height="20" rx="1" fill="#f2c811"/>
+    </svg>
+    Power BI
+  </div>
+</div>
+
+<!-- ══ FILTER BAR ══ -->
+<div class="filterbar">
+  <label style="font-size:11px;font-weight:600;color:#556">Desde:</label>
+  <input type="date" id="dateFrom" class="select-filter" value="2026-04-01" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
+  <label style="font-size:11px;font-weight:600;color:#556">Hasta:</label>
+  <input type="date" id="dateTo" class="select-filter" value="2026-04-30" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
+  <select id="filterProd" class="select-filter">
+    <option value="">Todos los productos</option>
+    <option value="BLOQUE 6">Bloque 6</option>
+    <option value="BLOQUE 4">Bloque 4</option>
+    <option value="CEMENTO CANAL">Cemento Canal</option>
+    <option value="CEMENTO CONTINENTAL">Cemento Continental</option>
+    <option value="TRANSPORTE VOLKSWAGEN">Transporte</option>
+  </select>
+  <button id="btnApply" class="btn-primary">&#128269; Aplicar</button>
+  <button id="btnReset" class="btn-secondary">&#10006; Limpiar</button>
+</div>
+
+<!-- ══ CONTENT ══ -->
+<!-- SECCIÓN: RESUMEN (default) -->
+<div class="content" id="sec-resumen">
+
+  <!-- KPI Row -->
+  <div class="kpi-row" style="grid-template-columns:repeat(7,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Ventas Totales</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128176;</div>
+        <div class="kpi-value" id="kpiVentas">C$ 1,594,705</div>
+        <span class="kpi-pct" id="kpiVentasPct">100%</span>
+      </div>
+      <div class="kpi-trend" id="kpiVentasTrend">vs mes anterior <span class="dn">&#9660; -39.1%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkVentas"></canvas></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Costo de Ventas</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128218;</div>
+        <div class="kpi-value" id="kpiCosto">C$ 963,435</div>
+        <span class="kpi-pct kpi-pct-neg" id="kpiCostoPct">60.4%</span>
+      </div>
+      <div class="kpi-trend" id="kpiCostoTrend">vs mes anterior <span class="dn">&#9660; -40.6%</span></div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Utilidad Bruta</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128188;</div>
+        <div class="kpi-value" id="kpiUB">C$ 631,270</div>
+        <span class="kpi-pct kpi-pct-light" id="kpiUBPct">39.6%</span>
+      </div>
+      <div class="kpi-trend" style="color:#aabbdd" id="kpiUBTrend">vs mes anterior <span style="color:#ef9a9a;font-weight:700">&#9660; -36.7%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkUB"></canvas></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Gastos Operativos</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128196;</div>
+        <div class="kpi-value" id="kpiGastos">C$ 550,976</div>
+        <span class="kpi-pct kpi-pct-warn" id="kpiGastosPct">34.6%</span>
+      </div>
+      <div class="kpi-trend">vs mes anterior <span class="up">&#9650; +4.9%</span></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Reinversión</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap">&#128200;</div>
+        <div class="kpi-value" id="kpiUN">C$ 80,295</div>
+        <span class="kpi-pct kpi-pct-ok" id="kpiUNPct">5.0%</span>
+      </div>
+      <div class="kpi-trend" id="kpiUNTrend">vs mes anterior <span class="dn">&#9660; -83.0%</span></div>
+      <div class="kpi-sparkline-wrap"><canvas id="spkUN"></canvas></div>
+    </div>
+    <div class="kpi green" id="kpiReinvCard" style="cursor:pointer;border:2px solid #00aa55" onclick="toggleReinvDetalle()" title="Ver desglose">
+      <div class="kpi-label" style="color:#00aa55">&#9654; Utilidad Neta</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap" style="background:#e6f9f0">&#128260;</div>
+        <div class="kpi-value" id="kpiReinv" style="color:#00aa55">C$ —</div>
+        <span class="kpi-pct kpi-pct-ok" id="kpiReinvPct">—</span>
+      </div>
+      <div class="kpi-trend" id="kpiReinvTrend" style="color:#666">Inversión + Utilidad Neta</div>
+    </div>
+    <div class="kpi highlighted pct">
+      <div class="kpi-label">Margen de Utilidad</div>
+      <div class="kpi-body">
+        <div class="kpi-icon-wrap" style="font-size:14px;font-weight:800;color:#fff">%</div>
+        <div class="kpi-value" id="kpiMargen">5.0%</div>
+      </div>
+      <div class="kpi-trend" style="color:#aabbdd">Utilidad Neta / Ventas</div>
+    </div>
+  </div>
+
+  <!-- Reinversión detalle panel (hidden by default) -->
+  <div id="reinvDetalle" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px;margin-top:-4px">
+    <div style="font-size:12px;font-weight:700;color:#166534;margin-bottom:10px">📊 Desglose de Reinversión del Mes</div>
+    <table style="width:100%;font-size:12px">
+      <thead><tr style="color:#666"><th style="text-align:left">Componente</th><th style="text-align:right">Monto (C$)</th></tr></thead>
+      <tbody id="reinvDetalleBody"></tbody>
+      <tfoot id="reinvDetalleFoot"></tfoot>
+    </table>
+    <div style="margin-top:8px;font-size:10px;color:#888">* Reinversión = Capital comprometido (Gasto por Inversión) + Utilidad Neta generada en el periodo.</div>
+  </div>
+
+  <!-- Middle Row -->
+  <div class="mid-row">
+
+    <!-- Line Chart: Ventas diarias Abril 2026 -->
+    <div class="card">
+      <div class="card-title" id="lineChartTitle">Ventas, Costo y Utilidad Bruta (Por día) — Abril 2026</div>
+      <div class="chart-subtitle" id="lineChartSub">Abril 2026 &nbsp;|&nbsp; Todos los productos</div>
+      <canvas id="lineChart" height="130"></canvas>
+    </div>
+
+    <!-- Bar+Line Chart: Utilidad Bruta Mensual -->
+    <div class="card">
+      <div class="card-title">Utilidad Bruta Mensual</div>
+      <canvas id="barLineChart" height="130"></canvas>
+    </div>
+
+    <!-- Donut: Estructura de Costos -->
+    <div class="card">
+      <div class="card-title">Estructura de Costos</div>
+      <div style="position:relative;width:160px;height:160px;margin:0 auto 12px">
+        <canvas id="donutChart"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+          <div style="font-size:13px;font-weight:800;color:#1a1a2e" id="donutCenter">C$963,435</div>
+          <div style="font-size:9px;color:#888">Total Costo</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#1e3a8a;border-radius:2px;flex-shrink:0"></span>
+          <span>Materiales Directos<br><strong id="donutLegMat">C$760,639 (79.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#22c55e;border-radius:2px;flex-shrink:0"></span>
+          <span>Mano de Obra<br><strong>C$0 (0.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#f59e0b;border-radius:2px;flex-shrink:0"></span>
+          <span>Gastos de Producción<br><strong>C$0 (0.0%)</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px">
+          <span style="width:10px;height:10px;background:#ef4444;border-radius:2px;flex-shrink:0"></span>
+          <span>Otros Costos<br><strong id="donutLegOtros">C$202,796 (21.0%)</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Filters -->
+    <div class="sidebar-panel">
+      <div style="font-size:12px;font-weight:700;color:#1a1a2e;border-bottom:1px solid #e0e5ef;padding-bottom:8px">Filtros Rápidos</div>
+      <div class="filter-group">
+        <label>Año</label>
+        <select><option>2026</option><option>2025</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Mes</label>
+        <select>
+          <option>Mayo</option>
+          <option selected>Abril</option>
+          <option>Marzo</option>
+          <option>Febrero</option>
+          <option>Enero</option>
+          <option>Diciembre</option>
+          <option>Noviembre</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Producto</label>
+        <select>
+          <option>Todos</option>
+          <option>Bloque 6</option>
+          <option>Bloque 4</option>
+          <option>Cemento</option>
+          <option>Arena</option>
+          <option>Transporte</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Cliente</label>
+        <select><option>Todos</option></select>
+      </div>
+      <div class="last-update">
+        &#128197;
+        <div>
+          <div style="font-weight:700;margin-bottom:2px">Última Actualización</div>
+          02/05/2026 12:27 AM
+        </div>
+      </div>
+      <div class="notes-box">
+        <strong>Notas</strong><br>
+        Los datos se actualizan automáticamente al cambiar los filtros.
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bot-row">
+
+    <!-- Estado de Resultados -->
+    <div class="card">
+      <div class="card-title">Estado de Resultados (Resumen)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Este Mes (C$)</th>
+            <th>% Ventas</th>
+            <th>Mes Anterior (C$)</th>
+            <th>% Ventas</th>
+            <th>Variación</th>
+          </tr>
+        </thead>
+        <tbody id="erBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Utilidad por Producto -->
+    <div class="card">
+      <div class="card-title">Utilidad Bruta por Producto</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Ventas (C$)</th>
+            <th>Costo (C$)</th>
+            <th>Utilidad Bruta (C$)</th>
+            <th>Margen %</th>
+          </tr>
+        </thead>
+        <tbody id="productTable"></tbody>
+      </table>
+    </div>
+
+    <!-- Gastos Operativos -->
+    <div class="card">
+      <div class="card-title">Gastos Operativos por Categoría</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Monto (C$)</th>
+            <th>% del Total</th>
+          </tr>
+        </thead>
+        <tbody id="gastosTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Metrics Row -->
+  <div class="metrics-row">
+    <div class="metric-card blue">
+      <div class="metric-icon">&#9878;</div>
+      <div>
+        <div class="metric-label">Punto de Equilibrio</div>
+        <div class="metric-value" id="metPE">C$ —</div>
+        <div class="metric-sub">Ventas necesarias para cubrir costos y gastos</div>
+      </div>
+    </div>
+    <div class="metric-card green">
+      <div class="metric-icon">&#128203;</div>
+      <div>
+        <div class="metric-label">ROI (Estimado)</div>
+        <div class="metric-value" id="metROI">—</div>
+        <div class="metric-sub">Retorno sobre inversión del periodo</div>
+      </div>
+    </div>
+    <div class="metric-card teal">
+      <div class="metric-icon">&#128181;</div>
+      <div>
+        <div class="metric-label">Flujo Neto de Efectivo</div>
+        <div class="metric-value" id="metFlujo">C$ —</div>
+        <div class="metric-sub">Entradas - Salidas de efectivo</div>
+      </div>
+    </div>
+    <div class="metric-card orange">
+      <div class="metric-icon">&#128202;</div>
+      <div>
+        <div class="metric-label">Rendimiento sobre Ventas</div>
+        <div class="metric-value" id="metRendimiento">—</div>
+        <div class="metric-sub">Utilidad Neta / Ventas Netas</div>
+      </div>
+    </div>
+    <div class="metric-card purple">
+      <div class="metric-icon">&#128200;</div>
+      <div>
+        <div class="metric-label">Tendencia General</div>
+        <div class="metric-value" id="metTendencia">—</div>
+        <div class="metric-sub" id="metTendenciaSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pérdidas por Productos Dañados -->
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start">
+    <div class="metric-card" style="border-left:5px solid #e53935;min-width:220px">
+      <div class="metric-icon">&#9888;</div>
+      <div>
+        <div class="metric-label" style="color:#e53935">Pérdidas — Productos Dañados</div>
+        <div class="metric-value" style="color:#e53935;font-size:22px">C$ 71,869</div>
+        <div class="metric-sub">Acumulado histórico (Nov 2025 – May 2026)</div>
+        <div style="margin-top:6px;font-size:11px;color:#888">
+          Nov: C$20,115 &nbsp;|&nbsp; Dic: C$17,444 &nbsp;|&nbsp; Ene: C$25,536 &nbsp;|&nbsp; May: C$8,774
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="card-title">&#9888; Detalle de Bajas por Productos Dañados</div>
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Producto</th><th>Cantidad (uds)</th><th>P. Costo Unit.</th><th>Pérdida (C$)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-01-31</td><td>Bloque (13.69)</td>
+            <td style="text-align:right">281</td><td>C$13.69</td><td class="fw dn">3,847</td>
+          </tr>
+          <tr>
+            <td>2026-01-31</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">611</td><td>C$16.00</td><td class="fw dn">9,776</td>
+          </tr>
+          <tr>
+            <td>2026-04-21</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">0</td><td>C$16.00</td><td class="fw" style="color:#888">0</td>
+          </tr>
+          <tr>
+            <td>2026-05-23</td><td>Bloque (16.00)</td>
+            <td style="text-align:right">349</td><td>C$16.00</td><td class="fw dn">5,584</td>
+          </tr>
+          <tr>
+            <td>2026-05-23</td><td>Bloque (13.69)</td>
+            <td style="text-align:right">233</td><td>C$13.69</td><td class="fw dn">3,190</td>
+          </tr>
+          <tr style="border-top:2px solid #cdd5e0;background:#fff0f0">
+            <td colspan="2" class="fw">TOTAL PÉRDIDA REGISTRADA (detalle)</td>
+            <td style="text-align:right;font-weight:700">1,474</td><td></td>
+            <td class="fw dn" style="font-size:14px">22,397</td>
+          </tr>
+          <tr style="background:#fff0f0">
+            <td colspan="4" class="fw" style="color:#888;font-size:11px">+ Pérdidas Nov–Dic sin detalle de producto</td>
+            <td class="fw dn">49,472</td>
+          </tr>
+          <tr style="background:#ffe8e8;border-top:2px solid #e53935">
+            <td colspan="4" class="fw" style="color:#e53935">TOTAL ACUMULADO</td>
+            <td class="fw" style="color:#e53935;font-size:15px">71,869</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Meta Mensual vs Real + Proyección -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0">
+
+    <!-- Meta vs Real -->
+    <div class="card" style="border-top:3px solid #1e40af">
+      <div class="card-title">&#127919; Meta Mensual vs Real</div>
+      <div id="metaPanel">
+        <!-- filled by JS -->
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <span style="font-size:12px;color:#555">Ventas acumuladas</span>
+          <span style="font-size:13px;font-weight:700" id="metaVentasVal">—</span>
+        </div>
+        <!-- PE progress bar -->
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+            <span>Punto de Equilibrio (meta mínima)</span>
+            <span id="metaPELabel">—</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:6px;height:14px;overflow:hidden;position:relative">
+            <div id="metaPEBar" style="height:100%;border-radius:6px;background:#1e40af;transition:width .5s"></div>
+            <div id="metaPEPin" style="position:absolute;top:0;height:100%;width:2px;background:#dc2626"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-top:3px">
+            <span>C$ 0</span><span id="metaPERightLabel">Meta PE</span>
+          </div>
+        </div>
+        <!-- UN vs meta -->
+        <div id="metaStatusBox" style="border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.7"></div>
+      </div>
+    </div>
+
+    <!-- Proyección del mes -->
+    <div class="card" style="border-top:3px solid #10b981">
+      <div class="card-title">&#128200; Proyección del Mes en Curso</div>
+      <div id="proyPanel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:10px;color:#666;text-transform:uppercase;font-weight:700">Días operados</div>
+            <div style="font-size:22px;font-weight:800;color:#1e40af" id="proyDias">—</div>
+          </div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px;text-align:center">
+            <div style="font-size:10px;color:#666;text-transform:uppercase;font-weight:700">Días del mes</div>
+            <div style="font-size:22px;font-weight:800;color:#374151" id="proyDiasMes">—</div>
+          </div>
+        </div>
+        <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="font-size:11px;color:#065f46;font-weight:600;margin-bottom:2px">Promedio diario actual</div>
+          <div style="font-size:18px;font-weight:800;color:#059669" id="proyPromDiario">—</div>
+        </div>
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px">
+          <div style="font-size:11px;color:#1e40af;font-weight:600;margin-bottom:2px">Proyección cierre de mes</div>
+          <div style="font-size:22px;font-weight:800;color:#1d4ed8" id="proyFinal">—</div>
+          <div style="font-size:10px;color:#888;margin-top:2px" id="proyVsMeta"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /sec-resumen -->
+
+<!-- SECCIÓN: VENTAS -->
+<div class="content" id="sec-ventas" style="display:none">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Ventas del Mes</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128176;</div><div class="kpi-value" id="vKpiVentas">C$ —</div></div>
+      <div class="kpi-trend" id="vKpiVentasTrend"></div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Nº de Transacciones</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128203;</div><div class="kpi-value" id="vKpiTx">—</div></div>
+      <div class="kpi-trend">tickets del periodo</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Venta Promedio/Día</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128200;</div><div class="kpi-value" id="vKpiProm">C$ —</div></div>
+      <div class="kpi-trend" style="color:#aabbdd">por día con ventas</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Mejor Día</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#127942;</div><div class="kpi-value" id="vKpiMejor">—</div></div>
+      <div class="kpi-trend" id="vKpiMejorSub"></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Ventas Diarias del Periodo</div>
+      <canvas id="vLineChart" height="130"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Productos por Ventas</div>
+      <canvas id="vBarProds" height="130"></canvas>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Detalle de Ventas por Producto — Periodo Activo</div>
+    <table>
+      <thead><tr><th>Producto</th><th>Ventas (C$)</th><th>Costo (C$)</th><th>Utilidad Bruta</th><th>Margen %</th><th>Cantidad</th></tr></thead>
+      <tbody id="vProdTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECCIÓN: GASTOS -->
+<div class="content" id="sec-gastos" style="display:none">
+  <div class="kpi-row" style="grid-template-columns:repeat(4,1fr)">
+    <div class="kpi orange">
+      <div class="kpi-label">Gastos Totales</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128196;</div><div class="kpi-value" id="gKpiTotal">C$ —</div></div>
+      <div class="kpi-trend" id="gKpiTrend"></div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Mayor Categoría</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128197;</div><div class="kpi-value" id="gKpiCat">—</div></div>
+      <div class="kpi-trend" id="gKpiCatSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">% sobre Ventas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128202;</div><div class="kpi-value" id="gKpiPct">—</div></div>
+      <div class="kpi-trend">gastos / ventas netas</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Utilidad Neta</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128181;</div><div class="kpi-value" id="gKpiUN">C$ —</div></div>
+      <div class="kpi-trend" style="color:#aabbdd">tras descontar gastos</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Gastos por Categoría</div>
+      <canvas id="gBarChart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Gastos Mensuales (Nov 2025 – May 2026)</div>
+      <canvas id="gMonthChart" height="160"></canvas>
+    </div>
+  </div>
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Detalle de Gastos — Periodo Activo</div>
+    <table>
+      <thead><tr><th>Categoría</th><th>Monto (C$)</th><th>% del Total</th></tr></thead>
+      <tbody id="gDetailTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECCIÓN: INVENTARIO -->
+<div class="content" id="sec-inventario" style="display:none">
+
+  <!-- KPIs -->
+  <div class="kpi-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Referencias Activas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128230;</div><div class="kpi-value" id="iKpiProds">—</div></div>
+      <div class="kpi-trend">productos vendidos en el periodo</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Producto Estrella</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#11088;</div><div class="kpi-value" id="iKpiEstrella" style="font-size:13px">—</div></div>
+      <div class="kpi-trend" id="iKpiEstrellaSub"></div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Mayor Margen</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128200;</div><div class="kpi-value" id="iKpiTopMargen" style="font-size:13px">—</div></div>
+      <div class="kpi-trend" id="iKpiTopMargenSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">Unidades Vendidas</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128667;</div><div class="kpi-value" id="iKpiUnidades">—</div></div>
+      <div class="kpi-trend">total uds del periodo</div>
+    </div>
+    <div class="kpi highlighted" style="border-top:3px solid #ef4444">
+      <div class="kpi-label" style="color:#f87171">Pérdidas por Daños</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap" style="background:rgba(239,68,68,.15)">&#9888;</div><div class="kpi-value" id="iKpiDanos" style="color:#f87171;font-size:16px">C$ —</div></div>
+      <div class="kpi-trend" id="iKpiDanosSub" style="color:#aabbdd"></div>
+    </div>
+  </div>
+
+  <!-- Análisis ABC + Chart participación -->
+  <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Análisis ABC — Participación en Ventas del Periodo</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:10px">A = Top 70% ventas &nbsp;|&nbsp; B = Siguiente 20% &nbsp;|&nbsp; C = Restante 10%</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Clase</th>
+            <th>Producto</th>
+            <th style="text-align:right">Uds Vendidas</th>
+            <th style="text-align:right">Ventas (C$)</th>
+            <th style="text-align:right">% Participación</th>
+            <th style="text-align:right">Margen</th>
+            <th style="text-align:center">Desempeño</th>
+          </tr>
+        </thead>
+        <tbody id="iAbcTable"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title">Mix de Ventas por Producto</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Participación % en ventas totales del periodo</div>
+      <canvas id="iMixChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Margen por producto + Tendencia histórica bloques -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Margen Bruto por Producto</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Verde ≥ 30% &nbsp;|&nbsp; Amarillo 10–30% &nbsp;|&nbsp; Rojo &lt; 10%</div>
+      <canvas id="iMargenChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Tendencia Mensual — Bloque 6 vs Bloque 4</div>
+      <div style="font-size:10px;color:#888;margin-top:-10px;margin-bottom:8px">Ventas en C$ — Nov 2025 a May 2026</div>
+      <canvas id="iTendChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Panel pérdidas por daños -->
+  <div class="card" style="border-left:5px solid #ef4444">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="card-title" style="margin:0">&#9888; Impacto de Productos Dañados — Bloquera Fúnez (Acumulado)</div>
+      <span style="font-size:10px;color:#888">Solo Bloque 6 y Bloque 4 tienen registro confirmado de daños</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px" id="iDanosKpis"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th style="text-align:right">Uds Dañadas</th>
+          <th style="text-align:right">% sobre Entradas</th>
+          <th style="text-align:right">Precio Costo (C$)</th>
+          <th style="text-align:right">Pérdida Total (C$)</th>
+          <th style="text-align:center">Impacto</th>
+        </tr>
+      </thead>
+      <tbody id="iDanosTable"></tbody>
+    </table>
+    <div style="margin-top:8px;font-size:10px;color:#888">
+      * Dañados = unidades dadas de baja del registro "Productos Dañados". Precio costo = costo de producción unitario.
+      Productos sin registro de daños se omiten de esta tabla.
+    </div>
+  </div>
+
+  <!-- iBarChart oculto (necesario para compatibilidad con renderInventario original) -->
+  <div style="display:none"><canvas id="iBarChart"></canvas></div>
+  <div style="display:none"><canvas id="iFullTable" style="display:none"></canvas><tbody id="iFullTable" style="display:none"></tbody></div>
+  <div style="display:none"><table><tbody id="iStockTable"></tbody><tfoot id="iStockFoot"></tfoot></table></div>
+  <div style="display:none" id="iKpiRot"></div>
+  <div style="display:none" id="iKpiRotSub"></div>
+  <div style="display:none" id="iKpiCosto"></div>
+
+</div>
+
+<!-- SECCIÓN: ANÁLISIS -->
+<div class="content" id="sec-analisis" style="display:none">
+
+  <!-- Row 1: KPIs (6) + Health Score -->
+  <div class="kpi-row" style="grid-template-columns:repeat(6,1fr)">
+    <div class="kpi blue">
+      <div class="kpi-label">Punto de Equilibrio</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#9878;</div><div class="kpi-value" id="aKpiPE">C$ —</div></div>
+      <div class="kpi-trend">ventas mín. para no perder</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">ROI Estimado</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128203;</div><div class="kpi-value" id="aKpiROI">—</div></div>
+      <div class="kpi-trend" id="aKpiROISub">retorno sobre inversión</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Compras del Mes</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128666;</div><div class="kpi-value" id="aKpiCompras">C$ —</div></div>
+      <div class="kpi-trend" id="aKpiComprasSub"></div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-label">CxP Pendiente</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#128196;</div><div class="kpi-value" id="aKpiCxP">C$ —</div></div>
+      <div class="kpi-trend" id="aKpiCxPSub"></div>
+    </div>
+    <div class="kpi" style="border-top:3px solid #7c3aed">
+      <div class="kpi-label">Concentración Bloque 6</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap" style="background:rgba(124,58,237,.12)">&#9888;</div><div class="kpi-value" id="aKpiConc" style="font-size:22px">—</div></div>
+      <div class="kpi-trend" id="aKpiConcSub">del total de ventas</div>
+    </div>
+    <div class="kpi purple highlighted">
+      <div class="kpi-label">Health Score</div>
+      <div class="kpi-body"><div class="kpi-icon-wrap">&#127919;</div><div class="kpi-value" id="aKpiHealth" style="font-size:22px">—</div></div>
+      <div class="kpi-trend" style="color:#aabbdd" id="aKpiHealthSub"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Insight cards + Waterfall -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1.3fr;gap:12px">
+    <div class="card" style="border-left:4px solid #1e3a8a">
+      <div class="card-title">&#11088; Producto Líder</div>
+      <div id="hallazgoProd" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <div class="card" style="border-left:4px solid #ea6c00">
+      <div class="card-title">&#128196; Gasto Dominante</div>
+      <div id="hallazgoGasto" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <div class="card" style="border-left:4px solid #22c55e">
+      <div class="card-title">&#128181; Flujo de Caja</div>
+      <div id="hallazgoFlujo" style="font-size:13px;line-height:1.8"></div>
+    </div>
+    <!-- Waterfall P&L -->
+    <div class="card" style="border-left:4px solid #7c3aed">
+      <div class="card-title">&#127891; Cascada P&amp;L — Mes Activo</div>
+      <div id="aWaterfall" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Evolución multi-línea (margen overlay) + Margen evolution -->
+  <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Evolución Mensual: Ventas · Compras · Costo · Gastos
+        <span style="font-size:10px;color:#aaa;margin-left:8px">Ene 2026 sin dato de gastos</span>
+      </div>
+      <canvas id="aEvolucionChart" height="130"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Evolución del Margen Bruto % (7 meses)</div>
+      <canvas id="aMargenEvolChart" height="130"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 4: Utilidad neta + Flujo caja -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Utilidad Neta Mensual (C$) — barras + tendencia</div>
+      <canvas id="aUNChart" height="140"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Flujo de Caja Mensual (Entradas vs Salidas)</div>
+      <canvas id="aCajaChart" height="140"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 5: CxP table + Pérdidas dañados -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card">
+      <div class="card-title">Cuentas por Pagar — Ventas a Crédito</div>
+      <table>
+        <thead><tr><th>Referencia</th><th>Fecha Venta</th><th>Total Venta</th><th>Saldo Pendiente</th><th>Estado</th></tr></thead>
+        <tbody id="aCxPTable"></tbody>
+      </table>
+    </div>
+    <div class="card" style="border-left:4px solid #e53935">
+      <div class="card-title">&#9888; Pérdidas por Productos Dañados (periodos con dato)</div>
+      <div id="aDanosAcum" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- Row 6: Resumen comparativo mensual con Δ MoM -->
+  <div class="card" style="margin-top:0">
+    <div class="card-title">Resumen Comparativo Mensual <span style="font-size:10px;color:#aaa;font-weight:400">— ↑↓ variación vs mes anterior</span></div>
+    <table>
+      <thead><tr><th>Mes</th><th>Ventas</th><th>Δ Ventas</th><th>Compras</th><th>Costo Vta</th><th>Gastos</th><th>U. Neta</th><th>Δ U.Neta</th><th>Margen %</th><th>Flujo Neto</th></tr></thead>
+      <tbody id="aMonthTable"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#667';
+
+
+// ═══════════════════════════════════════════════════════
+// AUTO-GENERADO por actualizar.py — 28/05/2026 13:53
+// ═══════════════════════════════════════════════════════
+
+var allDailyDates  = ["2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-25", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-09", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22"];
+var allDailyLabels = ["06 Abr", "07 Abr", "08 Abr", "09 Abr", "10 Abr", "11 Abr", "13 Abr", "14 Abr", "15 Abr", "16 Abr", "17 Abr", "18 Abr", "20 Abr", "21 Abr", "22 Abr", "23 Abr", "24 Abr", "25 Abr", "27 Abr", "28 Abr", "29 Abr", "30 Abr", "01 May", "02 May", "04 May", "05 May", "06 May", "07 May", "08 May", "09 May", "11 May", "12 May", "13 May", "14 May", "15 May", "16 May", "18 May", "19 May", "20 May", "21 May", "22 May"];
+var allDailyVentas = [71150, 75622, 107432, 18492, 98314, 67360, 95354, 51545, 23200, 67329, 39905, 69669, 47247, 64775, 145220, 82721, 52995, 103548, 168435, 67639, 36422, 40330, 97335, 65380, 62194, 96438, 72500, 65371, 32645, 19895, 207435, 472385, 89740, 73485, 60849, 13907, 21690, 23260, 89683, 56410, 47745];
+var allDailyCosto  = [16193341, 13947443, 83913921, 1253610, 45245121, 16540504, 21473880, 9774661, 716122, 38442368, 18675604, 20080493, 5733063, 14311218, 17325882, 36913217, 17540014, 109593927, 155074684, 7706362, 3554977, 8602258, 61085893, 37832497, 10845387, 42391639, 17109568, 12954702, 14632366, 3177234, 321309554, 2118720701, 39618772, 53876555, 25380903, 221951, 3908969, 8460800, 17920773, 10596906, 14999442];
+
+var meses          = ["Nov 2025", "Dic 2025", "Ene 2026", "Feb 2026", "Mar 2026", "Abr 2026", "May 2026"];
+var mensualVentas  = [1740606, 1826897, 1949496, 1692712, 2620094, 1594705, 1668347];
+var mensualCosto   = [694661590, 532475045, 656946196, 549267623, 1606413029, 662612670, 2815044613];
+var mensualUB      = mensualVentas.map(function(v,i){ return v - mensualCosto[i]; });
+var mensualMargen  = mensualVentas.map(function(v,i){ return v>0?((v-mensualCosto[i])/v*100).toFixed(1):'0'; });
+var mensualGastos  = [1546488, 1513742, 0, 0, 525370, 550975, 258380];
+var mensualCompras = mensualCosto.slice();  // Aproximación: compras ≈ costo ventas
+
+var mesActivo = '2026-05';
+
+var totalVentasPorMes = {"2026-04": 1594705, "2026-05": 1668347};
+
+var productosPorMes = {
+  "2026-04": [
+    {
+      "nombre": "BLOQUE 6",
+      "ventas": 1097733,
+      "costo": 648378944,
+      "qty": 44126
+    },
+    {
+      "nombre": "BLOQUE 4",
+      "ventas": 91578,
+      "costo": 11096019,
+      "qty": 3990
+    },
+    {
+      "nombre": "TRANSPORTE VOLKSWAGEN",
+      "ventas": 72000,
+      "costo": 0,
+      "qty": 34
+    },
+    {
+      "nombre": "CEMENTO CANAL",
+      "ventas": 65150,
+      "costo": 637364,
+      "qty": 145
+    },
+    {
+      "nombre": "CEMENTO CONTINENTAL",
+      "ventas": 51030,
+      "costo": 412335,
+      "qty": 120
+    },
+    {
+      "nombre": "HIERRO 3/8\\\" QQ",
+      "ventas": 38850,
+      "costo": 49000,
+      "qty": 18
+    },
+    {
+      "nombre": "ARENA CUBICO",
+      "ventas": 31095,
+      "costo": 38970,
+      "qty": 40
+    },
+    {
+      "nombre": "TRANSPORTE JMC",
+      "ventas": 30267,
+      "costo": 0,
+      "qty": 49
+    },
+    {
+      "nombre": "HIERRO 1/2",
+      "ventas": 16800,
+      "costo": 0,
+      "qty": 7
+    },
+    {
+      "nombre": "TABLAS",
+      "ventas": 14024,
+      "costo": 0,
+      "qty": 12
+    },
+    {
+      "nombre": "PIEDRÍN DE 1/2\\\" CUBICO",
+      "ventas": 10595,
+      "costo": 9930,
+      "qty": 10
+    },
+    {
+      "nombre": "ESTRIBOS CUADRADOS 10X10",
+      "ventas": 9140,
+      "costo": 1069800,
+      "qty": 1440
+    },
+    {
+      "nombre": "LAVANDERO SENCILLO",
+      "ventas": 6950,
+      "costo": 4842,
+      "qty": 4
+    },
+    {
+      "nombre": "LAVANDERO DOBLE",
+      "ventas": 6500,
+      "costo": 3150,
+      "qty": 3
+    },
+    {
+      "nombre": "BLOQUE DE 2DA DE 6",
+      "ventas": 4810,
+      "costo": 643856,
+      "qty": 219
+    },
+    {
+      "nombre": "LOSETAS BOBEDA 0.50X1X0.04",
+      "ventas": 4740,
+      "costo": 20280,
+      "qty": 17
+    },
+    {
+      "nombre": "HIERRO 1/4",
+      "ventas": 4275,
+      "costo": 3740,
+      "qty": 11
+    },
+    {
+      "nombre": "PIEDRAS CANTERA",
+      "ventas": 4227,
+      "costo": 53186,
+      "qty": 57
+    },
+    {
+      "nombre": "HIERRO 3/8 VARILLA",
+      "ventas": 4200,
+      "costo": 33750,
+      "qty": 24
+    },
+    {
+      "nombre": "ZINC",
+      "ventas": 3600,
+      "costo": 0,
+      "qty": 6
+    },
+    {
+      "nombre": "MATERIAL 0\\\" CUBICO",
+      "ventas": 3500,
+      "costo": 2769,
+      "qty": 3
+    },
+    {
+      "nombre": "ALAMBRE DE AMARRE",
+      "ventas": 2960,
+      "costo": 22320,
+      "qty": 74
+    },
+    {
+      "nombre": "REGLAS",
+      "ventas": 2728,
+      "costo": 0,
+      "qty": 13
+    },
+    {
+      "nombre": "ARENILLA DE PLAYA",
+      "ventas": 2200,
+      "costo": 0,
+      "qty": 44
+    },
+    {
+      "nombre": "PERLIN",
+      "ventas": 2080,
+      "costo": 0,
+      "qty": 4
+    },
+    {
+      "nombre": "PIEDRÍN DE 1/2\\\" LATA",
+      "ventas": 1680,
+      "costo": 8818,
+      "qty": 34
+    },
+    {
+      "nombre": "CUARTONES",
+      "ventas": 1596,
+      "costo": 0,
+      "qty": 6
+    },
+    {
+      "nombre": "LETRINA CON BANCO",
+      "ventas": 1500,
+      "costo": 0,
+      "qty": 1
+    },
+    {
+      "nombre": "HIERRO 1/4 VARIA",
+      "ventas": 1500,
+      "costo": 20000,
+      "qty": 20
+    },
+    {
+      "nombre": "AREN (LATA)",
+      "ventas": 1135,
+      "costo": 3285,
+      "qty": 38
+    },
+    {
+      "nombre": "ESTRIBO TRIANGULO",
+      "ventas": 910,
+      "costo": 50700,
+      "qty": 130
+    },
+    {
+      "nombre": "SOLDADURA (CAJA 60/11 1/8)",
+      "ventas": 900,
+      "costo": 45000,
+      "qty": 6
+    },
+    {
+      "nombre": "GOLOSOS",
+      "ventas": 875,
+      "costo": 0,
+      "qty": 350
+    },
+    {
+      "nombre": "CLAVOS DE 2/1",
+      "ventas": 764,
+      "costo": 3900,
+      "qty": 20
+    },
+    {
+      "nombre": "LOSETA PEQUEÑA",
+      "ventas": 720,
+      "costo": 0,
+      "qty": 3
+    },
+    {
+      "nombre": "ARENA COMERCIAL",
+      "ventas": 600,
+      "costo": 216,
+      "qty": 1
+    },
+    {
+      "nombre": "PIEDRÍN METRO COMERCIAL",
+      "ventas": 575,
+      "costo": 496,
+      "qty": 1
+    },
+    {
+      "nombre": "SACOS",
+      "ventas": 340,
+      "costo": 0,
+      "qty": 17
+    },
+    {
+      "nombre": "BLOQUES DE SEGUNDA 4",
+      "ventas": 300,
+      "costo": 0,
+      "qty": 15
+    },
+    {
+      "nombre": "CLAVOS DE 3",
+      "ventas": 120,
+      "costo": 0,
+      "qty": 3
+    },
+    {
+      "nombre": "CLAVOS DE 3 ACERO",
+      "ventas": 120,
+      "costo": 0,
+      "qty": 3
+    },
+    {
+      "nombre": "CLAVOS DE ACERO 2",
+      "ventas": 38,
+      "costo": 0,
+      "qty": 15
+    }
+  ],
+  "2026-05": [
+    {
+      "nombre": "BLOQUE 6",
+      "ventas": 1119675,
+      "costo": 2285865408,
+      "qty": 45324
+    },
+    {
+      "nombre": "BLOQUE 4",
+      "ventas": 310077,
+      "costo": 528581181,
+      "qty": 12989
+    },
+    {
+      "nombre": "TRANSPORTE VOLKSWAGEN",
+      "ventas": 101345,
+      "costo": 0,
+      "qty": 22
+    },
+    {
+      "nombre": "CEMENTO CANAL",
+      "ventas": 26530,
+      "costo": 316828,
+      "qty": 59
+    },
+    {
+      "nombre": "CEMENTO CONTINENTAL",
+      "ventas": 18125,
+      "costo": 137318,
+      "qty": 43
+    },
+    {
+      "nombre": "HIERRO 3/8\\\" QQ",
+      "ventas": 17850,
+      "costo": 28000,
+      "qty": 10
+    },
+    {
+      "nombre": "ARENA CUBICO",
+      "ventas": 14875,
+      "costo": 12990,
+      "qty": 20
+    },
+    {
+      "nombre": "TRANSPORTE JMC",
+      "ventas": 13985,
+      "costo": 0,
+      "qty": 33
+    },
+    {
+      "nombre": "LAVANDERO DOBLE",
+      "ventas": 8900,
+      "costo": 4200,
+      "qty": 4
+    },
+    {
+      "nombre": "PIEDRÍN DE 1/2\\\" CUBICO",
+      "ventas": 7500,
+      "costo": 9930,
+      "qty": 8
+    },
+    {
+      "nombre": "LAVANDERO SENCILLO",
+      "ventas": 7000,
+      "costo": 4842,
+      "qty": 4
+    },
+    {
+      "nombre": "HIERRO 1/4",
+      "ventas": 5200,
+      "costo": 264,
+      "qty": 4
+    },
+    {
+      "nombre": "ARENILLA DE PLAYA",
+      "ventas": 3120,
+      "costo": 0,
+      "qty": 34
+    },
+    {
+      "nombre": "REPEMAX",
+      "ventas": 2160,
+      "costo": 0,
+      "qty": 4
+    },
+    {
+      "nombre": "PIEDRAS CANTERA",
+      "ventas": 1990,
+      "costo": 30160,
+      "qty": 28
+    },
+    {
+      "nombre": "LETRINA CON BANCO",
+      "ventas": 1600,
+      "costo": 0,
+      "qty": 1
+    },
+    {
+      "nombre": "AREN (LATA)",
+      "ventas": 1540,
+      "costo": 2984,
+      "qty": 47
+    },
+    {
+      "nombre": "HIERRO 1/2",
+      "ventas": 1200,
+      "costo": 0,
+      "qty": 1
+    },
+    {
+      "nombre": "PIEDRÍN DE 1/2\\\" LATA",
+      "ventas": 950,
+      "costo": 2800,
+      "qty": 21
+    },
+    {
+      "nombre": "LAVA LAMPAZO",
+      "ventas": 950,
+      "costo": 427,
+      "qty": 1
+    },
+    {
+      "nombre": "ESTRIBOS CUADRADOS 10X10",
+      "ventas": 900,
+      "costo": 37500,
+      "qty": 150
+    },
+    {
+      "nombre": "ALAMBRE DE AMARRE",
+      "ventas": 760,
+      "costo": 1820,
+      "qty": 19
+    },
+    {
+      "nombre": "ASTRILLA",
+      "ventas": 600,
+      "costo": 0,
+      "qty": 2
+    },
+    {
+      "nombre": "SACOS",
+      "ventas": 380,
+      "costo": 0,
+      "qty": 19
+    },
+    {
+      "nombre": "ARENA COMERCIAL",
+      "ventas": 360,
+      "costo": 216,
+      "qty": 1
+    },
+    {
+      "nombre": "LOSETAS BOBEDA 0.50X1X0.04",
+      "ventas": 300,
+      "costo": 120,
+      "qty": 1
+    },
+    {
+      "nombre": "ESTRIBO TRIANGULO",
+      "ventas": 300,
+      "costo": 7500,
+      "qty": 50
+    },
+    {
+      "nombre": "HIERRO 3/8 VARILLA",
+      "ventas": 175,
+      "costo": 125,
+      "qty": 1
+    }
+  ]
+};
+
+var gastosPorMes = {};
+gastosPorMes['2026-04'] = [{"cat": "Gasto Administrativo", "monto": 412177}, {"cat": "Gasto por Inversión", "monto": 120310}, {"cat": "Combustible", "monto": 17950}, {"cat": "Viáticos", "monto": 538}];
+gastosPorMes['2026-05'] = [{"cat": "Gasto Administrativo", "monto": 258200}, {"cat": "Viáticos", "monto": 180}];
+gastosPorMes['2026-03'] = [{"cat": "Gasto Administrativo", "monto": 450000}, {"cat": "Gasto por Inversión", "monto": 75370}];
+gastosPorMes['2025-12'] = [{"cat": "Gasto Administrativo", "monto": 1450000}, {"cat": "Gasto por Inversión", "monto": 63742}];
+gastosPorMes['2025-11'] = [{"cat": "Gasto Administrativo", "monto": 1482746}, {"cat": "Gasto por Inversión", "monto": 63742}];
+
+function getProductosForMes(mes) {
+  return productosPorMes[mes] || productosPorMes['2026-05'] || [];
+}
+function getGastosForMes(mes) {
+  return gastosPorMes[mes] || [];
+}
+
+// Flujo caja y compras (placeholder — agrega en gastos.json si tienes datos)
+var mensualCompras = mensualCosto.slice();
+var cajaData = {
+  entradas: mensualVentas.map(function(v){ return Math.round(v*0.06); }),
+  salidas:  mensualVentas.map(function(v){ return Math.round(v*0.35); }),
+  neto:     mensualUB
+};
+var totalCxP = 0;
+
+function getDonutForMes(mes) {
+  var prods = getProductosForMes(mes);
+  var total = prods.reduce(function(s,p){return s+p.costo;},0);
+  return {mat: Math.round(total*0.79), otros: Math.round(total*0.21), total: total};
+}
+
+// ══ PRO ENHANCEMENTS ══
+
+// ── 1. SPARKLINES en KPIs ──
+var spkVentasChart = null, spkUBChart = null, spkUNChart = null;
+var mensualUN = mensualVentas.map(function(v,i){return v - mensualCosto[i] - mensualGastos[i];});
+
+function makeSparkline(canvasId, data, color) {
+  var el = document.getElementById(canvasId);
+  if (!el) return null;
+  var existing = Chart.getChart(el);
+  if (existing) existing.destroy();
+  return new Chart(el, {
+    type: 'line',
+    data: {
+      labels: meses,
+      datasets: [{
+        data: data,
+        borderColor: color,
+        backgroundColor: color.replace(')', ',.15)').replace('rgb', 'rgba'),
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 1.5
+      }]
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false } }
+    }
+  });
+}
+
+spkVentasChart = makeSparkline('spkVentas', mensualVentas, '#1e3a8a');
+spkUBChart     = makeSparkline('spkUB',     mensualUB,     'rgb(30,180,100)');
+spkUNChart     = makeSparkline('spkUN',     mensualUN,     'rgb(0,137,123)');
+
+// ── 2. SUBTITLE DINÁMICO en chart principal ──
+var _origApplyFilters = applyFilters;
+// Patch applyFilters to update subtitle
+var _applyPatched = false;
+function patchApplyFilters() {
+  if (_applyPatched) return; _applyPatched = true;
+  var origBtn = document.getElementById('btnApply');
+  var origReset = document.getElementById('btnReset');
+  function updateSub() {
+    var from = document.getElementById('dateFrom').value;
+    var to   = document.getElementById('dateTo').value;
+    var sub  = document.getElementById('lineChartSub');
+    if (!sub) return;
+    var prod = document.getElementById('filterProd');
+    var prodVal = prod && prod.value ? prod.options[prod.selectedIndex].text : 'Todos los productos';
+    var fromFmt = from ? from.split('-').reverse().join('/') : '';
+    var toFmt   = to   ? to.split('-').reverse().join('/')   : '';
+    var periodoStr = (from === to || !to) ? fromFmt : (fromFmt + ' — ' + toFmt);
+    sub.textContent = periodoStr + '  |  ' + prodVal;
+  }
+  document.getElementById('btnApply').addEventListener('click', updateSub);
+  document.getElementById('btnReset').addEventListener('click', function(){ setTimeout(updateSub, 50); });
+  document.getElementById('dateFrom').addEventListener('change', updateSub);
+  document.getElementById('dateTo').addEventListener('change', updateSub);
+  updateSub();
+}
+patchApplyFilters();
+
+// ── 3. PROGRESS BARS mejoradas en tabla de productos ──
+// Override renderProductTable para usar las nuevas clases
+var _origRenderProductTable = renderProductTable;
+renderProductTable = function(filtV, filtC) {
+  var prods = getProductosForMes(mesActivo);
+  var mesTotal = totalVentasPorMes[mesActivo] || filtV || 1;
+  var scale = mesTotal > 0 ? filtV / mesTotal : 1;
+  var ptBody = document.getElementById('productTable');
+  ptBody.innerHTML = '';
+  var ptTotal = {v:0,c:0}, ptTotalQty = 0;
+  prods.forEach(function(p){
+    var sv = Math.round(p.ventas * scale);
+    var sc = Math.round(p.costo * scale);
+    var sq = Math.round((p.qty || 0) * scale);
+    var ub = sv - sc;
+    var m  = sv > 0 ? (ub/sv*100).toFixed(1) : '0.0';
+    var mNum = parseFloat(m);
+    var barColor = mNum >= 30 ? '#22c55e' : mNum >= 15 ? '#f59e0b' : '#ef4444';
+    var barW = Math.min(Math.max(mNum, 0), 100);
+    ptTotal.v += sv; ptTotal.c += sc; ptTotalQty += sq;
+    ptBody.innerHTML += '<tr>' +
+      '<td>' + p.nombre + '</td>' +
+      '<td class="fw" style="text-align:right">' + sq.toLocaleString() + '</td>' +
+      '<td class="fw">' + sv.toLocaleString() + '</td>' +
+      '<td>' + sc.toLocaleString() + '</td>' +
+      '<td class="fw up">' + ub.toLocaleString() + '</td>' +
+      '<td>' +
+        '<div class="prod-margin-wrap">' +
+          '<div class="prod-margin-bar" style="width:' + Math.round(barW * 0.7) + 'px;background:' + barColor + '"></div>' +
+          '<span class="prod-margin-label" style="color:' + barColor + '">' + m + '%</span>' +
+        '</div>' +
+      '</td>' +
+    '</tr>';
+  });
+  var tubTotal = ptTotal.v - ptTotal.c;
+  var tmTotal  = ptTotal.v > 0 ? (tubTotal/ptTotal.v*100).toFixed(1) : '0.0';
+  ptBody.innerHTML += '<tr style="border-top:2px solid #cdd5e0;font-weight:700">' +
+    '<td class="fw">Total</td>' +
+    '<td class="fw" style="text-align:right">' + ptTotalQty.toLocaleString() + '</td>' +
+    '<td class="fw">' + ptTotal.v.toLocaleString() + '</td>' +
+    '<td class="fw">' + ptTotal.c.toLocaleString() + '</td>' +
+    '<td class="fw up">' + tubTotal.toLocaleString() + '</td>' +
+    '<td class="fw">' + tmTotal + '%</td>' +
+  '</tr>';
+};
+// Re-render after override
+applyFilters();
+
+// ── 4. SIDEBAR DRAWER colapsable ──
+(function() {
+  // Crear drawer HTML dinámicamente
+  var overlay = document.createElement('div');
+  overlay.className = 'sidebar-drawer-overlay';
+  overlay.id = 'sidebarOverlay';
+  document.body.appendChild(overlay);
+
+  var drawer = document.createElement('div');
+  drawer.className = 'sidebar-drawer';
+  drawer.id = 'sidebarDrawer';
+  drawer.innerHTML = [
+    '<button class="sidebar-drawer-close" id="btnCloseSidebar">&#10005;</button>',
+    '<h2>&#9881; Filtros Rápidos</h2>',
+    '<div class="filter-group"><label>Año</label>',
+    '<select id="dYear"><option>2026</option><option>2025</option></select></div>',
+    '<div class="filter-group"><label>Mes</label>',
+    '<select id="dMes">',
+    '<option>Mayo</option><option selected>Abril</option><option>Marzo</option>',
+    '<option>Febrero</option><option>Enero</option><option>Diciembre</option><option>Noviembre</option>',
+    '</select></div>',
+    '<div class="filter-group"><label>Producto</label>',
+    '<select id="dProd"><option value="">Todos</option><option>Bloque 6</option><option>Bloque 4</option><option>Cemento</option><option>Transporte</option></select></div>',
+    '<div style="background:#f0f4ff;border-radius:8px;padding:10px;font-size:11px;color:#334;margin-top:4px">',
+    '&#128197; <strong>Última actualización</strong><br>02/05/2026 12:27 AM',
+    '</div>',
+    '<div style="background:#f8f9fc;border-radius:8px;padding:10px;font-size:10px;color:#556;line-height:1.6">',
+    'Los datos se actualizan al cambiar los filtros.',
+    '</div>',
+    '<button class="btn-primary" id="btnApplyDrawer" style="width:100%;justify-content:center;margin-top:4px">&#128269; Aplicar</button>'
+  ].join('');
+  document.body.appendChild(drawer);
+
+  function openDrawer() { drawer.classList.add('open'); overlay.classList.add('open'); }
+  function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('open'); }
+
+  document.getElementById('btnToggleSidebar').addEventListener('click', openDrawer);
+  document.getElementById('btnCloseSidebar').addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+
+  var mesMap = {
+    'Mayo':'05','Abril':'04','Marzo':'03','Febrero':'02',
+    'Enero':'01','Diciembre':'12','Noviembre':'11'
+  };
+
+  document.getElementById('btnApplyDrawer').addEventListener('click', function(){
+    var yr = document.getElementById('dYear').value;
+    var mn = mesMap[document.getElementById('dMes').value] || '04';
+    var days = new Date(parseInt(yr), parseInt(mn), 0).getDate();
+    document.getElementById('dateFrom').value = yr+'-'+mn+'-01';
+    document.getElementById('dateTo').value   = yr+'-'+mn+'-'+String(days).padStart(2,'0');
+    applyFilters();
+    closeDrawer();
+  });
+})();
+</script>
+</body>
+</html>
