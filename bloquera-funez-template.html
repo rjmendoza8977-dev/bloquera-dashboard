@@ -2965,5 +2965,20 @@ applyFilters = function() { _origApply.apply(this, arguments); updateHeroBadge()
 document.addEventListener('DOMContentLoaded', function() { updateHeroBadge(); });
 
 </script>
+
+<!-- Hidden elements required by JS (filterbar was removed but IDs still needed) -->
+<div style="display:none" aria-hidden="true">
+  <select id="filterProd">
+    <option value="">Todos los productos</option>
+    <option value="BLOQUE 6">Bloque 6</option>
+    <option value="BLOQUE 8">Bloque 8</option>
+    <option value="BLOQUE 10">Bloque 10</option>
+    <option value="BLOQUE 12">Bloque 12</option>
+    <option value="ADOQUIN">Adoquin</option>
+    <option value="LADRILLO">Ladrillo</option>
+  </select>
+  <button id="btnApply"></button>
+  <button id="btnReset"></button>
+</div>
 </body>
 </html>
