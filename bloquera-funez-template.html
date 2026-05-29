@@ -32,11 +32,7 @@ body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#f0f2f5;colo
 .pbi-icon{width:24px;height:24px}
 
 /* ── FILTER BAR ── */
-.filterbar{
-  background:#fff;border-bottom:1px solid #dde2ee;
-  display:flex;align-items:center;justify-content:flex-end;
-  gap:12px;padding:10px 24px;
-}
+.filterbar{display:none}
 .date-input{
   display:flex;align-items:center;gap:6px;
   border:1px solid #cdd5e0;border-radius:6px;padding:5px 10px;
@@ -455,6 +451,80 @@ tbody tr:hover{background:#eff6ff;transition:background .12s}
   .hero-nav { padding: 6px 10px 10px; gap: 2px; }
   .hero-nav .nav-btn { padding: 6px 10px; font-size: 11px; }
 }
+
+/* ===== HERO FILTER INPUTS ===== */
+.hero-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.hero-filter-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8899cc;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.hero-date-input {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 120px;
+  outline: none;
+  transition: border-color .15s;
+}
+.hero-date-input:focus { border-color: #f59e0b; }
+.hero-date-input::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.6); cursor: pointer; }
+.hero-select-dark {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 24px 5px 8px;
+  cursor: pointer;
+  font-family: inherit;
+  min-width: 140px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aabbdd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px;
+  transition: border-color .15s;
+}
+.hero-select-dark:focus { border-color: #f59e0b; }
+.hero-select-dark option { background: #1a1a3e; color: #fff; }
+.hero-apply-btn {
+  background: #f59e0b;
+  color: #1a1a3e;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background .15s;
+}
+.hero-apply-btn:hover { background: #fbbf24; }
+.hero-filter-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,.15);
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .hero-filters { display: none; }
+}
 </style>
 </head>
 <body>
@@ -463,22 +533,6 @@ tbody tr:hover{background:#eff6ff;transition:background .12s}
 
 
 <!-- ══ FILTER BAR ══ -->
-<div class="filterbar">
-  <label style="font-size:11px;font-weight:600;color:#556">Desde:</label>
-  <input type="date" id="dateFrom" class="select-filter" value="2026-04-01" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
-  <label style="font-size:11px;font-weight:600;color:#556">Hasta:</label>
-  <input type="date" id="dateTo" class="select-filter" value="2026-04-30" min="2025-11-01" max="2026-05-22" style="min-width:130px"/>
-  <select id="filterProd" class="select-filter">
-    <option value="">Todos los productos</option>
-    <option value="BLOQUE 6">Bloque 6</option>
-    <option value="BLOQUE 4">Bloque 4</option>
-    <option value="CEMENTO CANAL">Cemento Canal</option>
-    <option value="CEMENTO CONTINENTAL">Cemento Continental</option>
-    <option value="TRANSPORTE VOLKSWAGEN">Transporte</option>
-  </select>
-  <button id="btnApply" class="btn-primary">&#128269; Aplicar</button>
-  <button id="btnReset" class="btn-secondary">&#10006; Limpiar</button>
-</div>
 <!-- ===== HERO BANNER ===== -->
 <div class="hero-banner" id="heroBanner">
   <div class="hero-top">
@@ -499,6 +553,15 @@ tbody tr:hover{background:#eff6ff;transition:background .12s}
     <button class="nav-btn">&#127959; Inventario</button>
     <button class="nav-btn">&#9881; Producci&#xF3;n</button>
     <button class="nav-btn">&#128200; An&#xE1;lisis</button>
+        <div class="hero-filter-sep"></div>
+    <div class="hero-filters">
+      <span class="hero-filter-label">Desde:</span>
+      <input type="date" id="dateFrom" class="hero-date-input" value="2026-04-01" min="2025-11-01" max="2026-05-22"/>
+      <span class="hero-filter-label">Hasta:</span>
+      <input type="date" id="dateTo" class="hero-date-input" value="2026-04-30" min="2025-11-01" max="2026-05-22"/>
+      <button class="hero-apply-btn" onclick="applyFilters()">&#9654; Aplicar</button>
+    </div>
+    <div class="hero-filter-sep"></div>
     <button id="btnToggleSidebar" class="filtros-btn" title="Filtros r&#xE1;pidos">&#9776; Filtros</button>
   </div>
 </div>
