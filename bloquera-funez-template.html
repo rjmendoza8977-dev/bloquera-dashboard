@@ -1380,6 +1380,21 @@ tbody tr:hover{background:#eff6ff;transition:background .12s}
 </div>
 </div>
 
+<!-- Hidden elements required by JS (filterbar was removed but IDs still needed) -->
+<div style="display:none" aria-hidden="true">
+  <select id="filterProd">
+    <option value="">Todos los productos</option>
+    <option value="BLOQUE 6">Bloque 6</option>
+    <option value="BLOQUE 8">Bloque 8</option>
+    <option value="BLOQUE 10">Bloque 10</option>
+    <option value="BLOQUE 12">Bloque 12</option>
+    <option value="ADOQUIN">Adoquin</option>
+    <option value="LADRILLO">Ladrillo</option>
+  </select>
+  <button id="btnApply"></button>
+  <button id="btnReset"></button>
+</div>
+
 <script>
 Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
 Chart.defaults.font.size   = 11;
@@ -2966,19 +2981,5 @@ document.addEventListener('DOMContentLoaded', function() { updateHeroBadge(); })
 
 </script>
 
-<!-- Hidden elements required by JS (filterbar was removed but IDs still needed) -->
-<div style="display:none" aria-hidden="true">
-  <select id="filterProd">
-    <option value="">Todos los productos</option>
-    <option value="BLOQUE 6">Bloque 6</option>
-    <option value="BLOQUE 8">Bloque 8</option>
-    <option value="BLOQUE 10">Bloque 10</option>
-    <option value="BLOQUE 12">Bloque 12</option>
-    <option value="ADOQUIN">Adoquin</option>
-    <option value="LADRILLO">Ladrillo</option>
-  </select>
-  <button id="btnApply"></button>
-  <button id="btnReset"></button>
-</div>
 </body>
 </html>
