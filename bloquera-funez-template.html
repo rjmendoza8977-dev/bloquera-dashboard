@@ -1944,7 +1944,7 @@ function applyFilters() {
   var to   = document.getElementById('dateTo').value;
 
   // Detect active month — accept any valid month
-  var validMeses = {'2025-11':0,'2025-12':1,'2026-01':2,'2026-02':3,'2026-03':4,'2026-04':5,'2026-05':6};
+  var validMeses = {"2025-11":0,"2025-12":1,"2026-01":2,"2026-02":3,"2026-03":4,"2026-04":5,"2026-05":6};
   var detected = detectMes(from, to);
   if (detected && validMeses[detected] !== undefined) {
     mesActivo = detected;
