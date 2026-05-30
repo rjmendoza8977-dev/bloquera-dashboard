@@ -1994,7 +1994,7 @@ function applyFilters() {
   renderMetrics(totalV, totalC, gastos);
 
   // Update line chart title
-  var titleEl = document.querySelector('.card-title');
+  var titleEl = document.getElementById('lineChartTitle') || document.querySelector('.card-title');
   var mesIdxMap = {'2025-11':0,'2025-12':1,'2026-01':2,'2026-02':3,'2026-03':4,'2026-04':5,'2026-05':6};
   var mesNombre = (mesIdxMap[mesActivo] !== undefined) ? meses[mesIdxMap[mesActivo]] : mesActivo;
   if (fLabels.length > 0) {
@@ -2017,6 +2017,31 @@ function applyFilters() {
   if (activeSec === 'sec-gastos')     { if (typeof renderGastosSection === 'function') renderGastosSection(); }
   if (activeSec === 'sec-inventario') { if (typeof renderInventario  === 'function') renderInventario(); }
   if (activeSec === 'sec-analisis')   { if (typeof renderAnalisis    === 'function') renderAnalisis(); }
+  // Always update resumen monthly chart
+  refreshResumenMonthlyChart();
+}
+
+// Refresh the barLineChart (Utilidad Bruta Mensual) with current data
+function refreshResumenMonthlyChart() {
+  if (typeof barLineChart === 'undefined' || !barLineChart) return;
+  // Recompute mensualUB from current arrays
+  var ubData  = mensualVentas.map(function(v,i){ return v - mensualCosto[i]; });
+  var pctData = mensualVentas.map(function(v,i){
+    return v > 0 ? parseFloat(((v - mensualCosto[i]) / v * 100).toFixed(1)) : 0;
+  });
+  barLineChart.data.datasets[0].data = ubData;
+  barLineChart.data.datasets[1].data = pctData;
+  barLineChart.update();
+
+  // Also highlight active month bar
+  var midx = {"2025-11":0,"2025-12":1,"2026-01":2,"2026-02":3,"2026-03":4,"2026-04":5,"2026-05":6};
+  var activeIdx = midx[mesActivo];
+  if (activeIdx !== undefined) {
+    barLineChart.data.datasets[0].backgroundColor = mensualVentas.map(function(_,i){
+      return i === activeIdx ? '#1e3a8a' : 'rgba(30,42,94,.55)';
+    });
+    barLineChart.update();
+  }
 }
 
 // ── BUTTON EVENTS ──
